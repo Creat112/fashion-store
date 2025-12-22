@@ -19,12 +19,15 @@ const createTables = () => {
     db.serialize(() => {
         // Users Table
         db.run(`CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
             email TEXT UNIQUE,
             password TEXT,
+            role TEXT DEFAULT 'customer',
             createdAt TEXT
-        )`);
+        )`, (err) => {
+            if (!err) {
+                seedAdmin();
+            }
+        });
 
         // Products Table
         db.run(`CREATE TABLE IF NOT EXISTS products (
@@ -78,6 +81,25 @@ const createTables = () => {
             productName TEXT,
             FOREIGN KEY(orderId) REFERENCES orders(id)
         )`);
+    });
+};
+
+const seedAdmin = () => {
+    db.get("SELECT count(*) as count FROM users WHERE role = 'admin'", (err, row) => {
+        if (err) return console.error(err.message);
+        if (row.count === 0) {
+            console.log("Seeding admin user...");
+            const admin = {
+                name: 'Admin User',
+                email: 'admin@fashion.com',
+                password: 'admin123', // In real app, hash this!
+                role: 'admin',
+                createdAt: new Date().toISOString()
+            };
+            const stmt = db.prepare("INSERT INTO users (name, email, password, role, createdAt) VALUES (?, ?, ?, ?, ?)");
+            stmt.run(admin.name, admin.email, admin.password, admin.role, admin.createdAt);
+            stmt.finalize();
+        }
     });
 };
 

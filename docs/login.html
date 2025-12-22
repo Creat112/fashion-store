@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,19 +8,21 @@
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/auth.css">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
+
 <body>
     <nav>
         <div class="container nav-container">
             <a href="index.html" class="logo">FASHION</a>
             <button class="mobile-menu-btn" id="menu-btn">
-    <i class="ri-menu-line"></i>
-</button>
+                <i class="ri-menu-line"></i>
+            </button>
             <ul class="nav-links">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="products.html">Shop</a></li>
                 <li><a href="login.html" class="active">Login</a></li>
-               
+
                 <li>
                     <a href="cart.html" class="cart-link">
                         <i class="ri-shopping-cart-line"></i>
@@ -63,16 +66,12 @@
 
         <div class="social-login">
             <p>Or sign in with</p>
-            <div class="social-buttons">
-                <button type="button" class="social-btn btn-google">
-                    <i class="ri-google-fill"></i>
-                </button>
-                <button type="button" class="social-btn btn-facebook">
-                    <i class="ri-facebook-fill"></i>
-                </button>
-                <button type="button" class="social-btn btn-twitter">
-                    <i class="ri-twitter-fill"></i>
-                </button>
+            <div id="g_id_onload"
+                data-client_id="633744806004-b1phb0vkuivleugtdrcmoumkior2sr31.apps.googleusercontent.com"
+                data-callback="handleGoogleLogin" data-auto_prompt="false">
+            </div>
+            <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline"
+                data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left">
             </div>
         </div>
 
@@ -84,4 +83,5 @@
     <script type="module" src="assets/js/app.js"></script>
     <script type="module" src="assets/js/auth.js"></script>
 </body>
+
 </html>

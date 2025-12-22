@@ -1,17 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Admin Dashboard - FASHION</title>
   <link rel="stylesheet" href="assets/css/admin.css">
-  <script>
-    // Check authentication before loading the page
-    if (sessionStorage.getItem('isAuthenticated') !== 'true') {
-      window.location.href = 'admin-login.html';
-    }
-  </script>
+
 </head>
+
 <body>
   <div class="admin-app">
     <aside class="sidebar">
@@ -83,19 +80,9 @@
     </main>
   </div>
 
-  <script>
-    // Add logout functionality
-    document.addEventListener('DOMContentLoaded', function() {
-      const logoutBtn = document.getElementById('logoutBtn');
-      if (logoutBtn) {
-        logoutBtn.addEventListener('click', function() {
-          sessionStorage.removeItem('isAuthenticated');
-          window.location.href = 'admin-login.html';
-        });
-      }
-    });
-  </script>
+
 
   <script type="module" src="assets/js/admin.js"></script>
 </body>
+
 </html>

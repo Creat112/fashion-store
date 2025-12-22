@@ -1,10 +1,23 @@
 // admin.js
 import { api } from './api.js';
 
-if (sessionStorage.getItem('isAuthenticated') !== 'true') {
-    window.location.href = 'admin-login.html';
-    throw new Error('Not authenticated');
+const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || localStorage.getItem('currentUser'));
+if (!currentUser || currentUser.role !== 'admin') {
+    window.location.href = 'login.html';
+    throw new Error('Not authenticated or authorized');
 }
+
+// Logout listener
+document.addEventListener('DOMContentLoaded', () => {
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('currentUser');
+            sessionStorage.removeItem('currentUser');
+            window.location.href = 'login.html';
+        });
+    }
+});
 
 // DOM elements
 const tabs = document.querySelectorAll('.nav-item');
@@ -46,7 +59,7 @@ applyTheme(localStorage.getItem('admin-theme') || 'light');
 // -------------------------
 const getAllProducts = async () => {
     try {
-        return await api.get('/products');
+        return await api.get('/products?includeDisabled=true');
     } catch (err) {
         console.error('Error fetching products:', err);
         return [];

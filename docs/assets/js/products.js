@@ -20,7 +20,7 @@ const getProductById = async (id) => {
     }
 };
 
-// Seed function not needed on frontend anymore
+// Seed function not needed on docs anymore
 const seedProducts = async () => { };
 
 export { getProducts, getProductById, seedProducts };

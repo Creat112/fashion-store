@@ -4,11 +4,16 @@ const { getDB } = require('../database/init');
 
 // Get all products
 router.get('/', (req, res) => {
-    const { category } = req.query;
+    const { category, includeDisabled } = req.query;
     const db = getDB();
 
-    let query = "SELECT * FROM products WHERE disabled = 0";
+    let query = "SELECT * FROM products WHERE 1=1";
     let params = [];
+
+    // If includeDisabled is not true, only show enabled products
+    if (includeDisabled !== 'true') {
+        query += " AND disabled = 0";
+    }
 
     if (category) {
         query += " AND category = ?";

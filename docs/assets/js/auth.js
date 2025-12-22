@@ -25,19 +25,43 @@ const handleLogin = async (e) => {
 
     try {
         const user = await api.post('/auth/login', { email, password });
-
-        if (rememberMe) {
-            localStorage.setItem('currentUser', JSON.stringify(user));
-        } else {
-            sessionStorage.setItem('currentUser', JSON.stringify(user));
-        }
-
-        updateAuthUI(user);
-        alert('Login successful!');
-        setTimeout(() => window.location.href = 'index.html', 1000);
+        finishLogin(user, rememberMe);
     } catch (error) {
         console.error('Login error:', error);
         alert(error.message || 'Login failed');
+    }
+};
+
+window.handleGoogleLogin = async (response) => {
+    console.log("Google Login callback triggered", response);
+    try {
+        const user = await api.post('/auth/google', { token: response.credential });
+        console.log("Google Auth API Success:", user);
+        finishLogin(user, true); // Always remember google logins or match preference
+    } catch (error) {
+        console.error('Google Login error:', error);
+        alert('Google Sign-In failed: ' + (error.message || 'Unknown error'));
+    }
+};
+
+const finishLogin = (user, remember) => {
+    console.log("Finishing login. User:", user);
+    if (remember) {
+        localStorage.setItem('currentUser', JSON.stringify(user));
+    } else {
+        sessionStorage.setItem('currentUser', JSON.stringify(user));
+    }
+
+    updateAuthUI(user);
+    alert('Login successful!');
+
+    console.log("Checking role:", user.role);
+    if (user.role === 'admin') {
+        console.log("Redirecting to admin.html");
+        setTimeout(() => window.location.href = 'admin.html', 1000);
+    } else {
+        console.log("Redirecting to index.html");
+        setTimeout(() => window.location.href = 'index.html', 1000);
     }
 };
 
