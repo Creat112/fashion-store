@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thank You - FASHION</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/checkout.css">
+    <style>
+        .thank-you-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .order-summary {
+            text-align: left;
+            margin-top: 30px;
+        }
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .order-item img {
+            width: 50px;
+            margin-right: 10px;
+        }
+        .order-details {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .btn-home {
+            margin-top: 30px;
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="container nav-container">
+            <a href="index.html" class="logo">FASHION</a>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="products.html">Shop</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="thank-you-container">
+        <h1>Thank You for Your Order!</h1>
+        <p>Your order has been successfully placed.</p>
+        <h2>Order Summary</h2>
+        <div class="order-summary" id="order-summary"></div>
+
+        <div class="order-details" id="order-details"></div>
+
+        <a href="index.html" class="btn-home">Return to Home</a>
+    </div>
+
+    <script>
+        window.addEventListener("DOMContentLoaded", () => {
+            const orderSummaryContainer = document.getElementById("order-summary");
+            const orderDetailsContainer = document.getElementById("order-details");
+
+            const currentOrder = JSON.parse(sessionStorage.getItem("currentOrder"));
+
+            if (!currentOrder) {
+                orderSummaryContainer.innerHTML = "<p>No order data found.</p>";
+                return;
+            }
+
+            // عرض المنتجات
+            currentOrder.items.forEach(item => {
+                const div = document.createElement("div");
+                div.className = "order-item";
+                div.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:10px">
+                        <img src="${item.image || 'assets/images/placeholder.jpg'}" alt="${item.name}" />
+                        <span>${item.name} × ${item.quantity}</span>
+                    </div>
+                    <b>$${(item.price * item.quantity).toFixed(2)}</b>
+                `;
+                orderSummaryContainer.appendChild(div);
+            });
+
+            // عرض التفاصيل الأخرى
+            orderDetailsContainer.innerHTML = `
+                <p><strong>Order Number:</strong> ${currentOrder.order.orderNumber}</p>
+                <p><strong>Date:</strong> ${new Date(currentOrder.order.date).toLocaleString()}</p>
+                <p><strong>Total:</strong> $${currentOrder.total.toFixed(2)}</p>
+                <p><strong>Customer Name:</strong> ${currentOrder.customer.fullName}</p>
+                <p><strong>Email:</strong> ${currentOrder.customer.email}</p>
+                <p><strong>Phone:</strong> ${currentOrder.customer.phone}</p>
+                <p><strong>Shipping Address:</strong> ${currentOrder.shipping.address}, ${currentOrder.shipping.city}, ${currentOrder.shipping.governorate}</p>
+                <p><strong>Notes:</strong> ${currentOrder.shipping.notes}</p>
+            `;
+        });
+    </script>
+</body>
+</html>

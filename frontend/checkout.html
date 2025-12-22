@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - FASHION</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/checkout.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+
+   
+</head>
+<body>
+    <nav>
+        <div class="container nav-container">
+            <a href="index.html" class="logo">FASHION</a>
+            <button class="mobile-menu-btn" id="menu-btn">
+                <i class="ri-menu-line"></i>
+            </button>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="products.html">Shop</a></li>
+                <li><a href="login.html">Login</a></li>
+                <li>
+                    <a href="cart.html" class="cart-link">
+                        <i class="ri-shopping-cart-line"></i>
+                        <span class="cart-count">0</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="checkout-container">
+        <form id="checkoutForm">
+            <div class="checkout-form">
+                <div class="form-section">
+                    <h2>Contact Information</h2>
+                    <div class="form-group">
+                        <label for="fullName">Full Name *</label>
+                        <input type="text" id="fullName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number *</label>
+                        <input type="tel" id="phone" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="secondaryPhone">Secondary Phone (Optional)</label>
+                        <input type="tel" id="secondaryPhone" class="form-control">
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h2>Shipping Address</h2>
+                    <div class="form-group">
+                        <label for="governorate">Governorate *</label>
+                        <input id="governorate" class="form-control" placeholder="Enter your governorate" type="text">
+                    </div>
+                    <div class="form-group">
+                        <label for="city">City *</label>
+                        <input id="city" class="form-control" placeholder="Enter your city" type="text">
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Full Address *</label>
+                        <textarea id="address" class="form-control" rows="3" required></textarea>
+                    </div>
+
+                    <h3>Select Location on Map</h3>
+                    <button type="button" id="gps-btn" class="gps-btn">Use My Current Location</button>
+                    <div id="map"></div>
+
+                    <div class="form-group">
+                        <label for="notes">Order Notes (Optional)</label>
+                        <textarea id="notes" class="form-control" rows="3" placeholder="Notes about your order"></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="order-summary">
+                <h2>Order Summary</h2>
+                <div id="order-items">
+                    <ul id="checkout-list"></ul>
+                </div>
+                <div class="order-total">
+                    Total: <span id="order-total">$0.00</span>
+                </div>
+                <button type="submit" class="btn">Place Order</button>
+            </div>
+        </form>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>FASHION</h3>
+                    <p>Your one-stop shop for the latest FASHION trends and styles.</p>
+                </div>
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="products.html">Shop</a></li>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Customer Service</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Shipping Policy</a></li>
+                        <li><a href="#">Returns & Exchanges</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script type="module" src="assets/js/app.js"></script>
+    <script type="module" src="assets/js/checkout.js"></script>
+</body>
+</html>

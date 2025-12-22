@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <title>FASHION - Shop Latest Trends</title>
+</head>
+<body>
+    <nav>
+        <div class="container nav-container">
+            <a href="index.html" class="logo">FASHION</a>
+            <button class="mobile-menu-btn" id="menu-btn" title="Open menu" aria-label="Open menu">
+                 <i class="ri-menu-line"></i>
+                </button>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="products.html">Shop</a></li>
+                <li><a href="login.html">Login</a></li>
+                
+                <li>
+                    <a href="cart.html" class="cart-link">
+                        <i class="ri-shopping-cart-line"></i>
+                        <span class="cart-count">0</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="container">
+            <h1 class="hero-title">Welcome to FASHION</h1>
+            <p class="hero-subtitle">Discover the latest trends and styles</p>
+            <a href="products.html" class="btn hero-cta">Shop Now</a>
+        </div>
+    </header>
+
+    <section class="container featured-section">
+        <h2 class="section-title">Featured Products</h2>
+        <div class="products-grid" id="featured-products">
+            <!-- Products will be loaded here -->
+        </div>
+    </section>
+            <!-- Products will be loaded here -->
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>FASHION</h3>
+                    <p>Your one-stop shop for the latest Fashion trends and styles.</p>
+                </div>
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="products.html">Shop</a></li>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Customer Service</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Shipping Policy</a></li>
+                        <li><a href="#">Returns & Exchanges</a></li>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Size Guide</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+        </div>
+    </footer>
+<script>
+    let   menuBtn= document.getElementById("menu-btn")
+    menuBtn.addEventListener('click', () => {
+                navLinks.classList.toggle('active');
+     });
+</script>
+    <script type="module" src="assets/js/app.js"></script>
+</body>
+</html>

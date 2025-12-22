@@ -1,0 +1,13 @@
+{
+  "name": "fashion-store-root",
+  "version": "1.0.0",
+  "description": "Root configuration for deployment",
+  "scripts": {
+    "start": "node backend/server.js",
+    "postinstall": "cd backend && npm install"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {}
+}

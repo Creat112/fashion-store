@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - FASHION</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/auth.css">
+</head>
+<body>
+    <nav>
+        <div class="container nav-container">
+            <a href="index.html" class="logo">FASHION</a>
+            <button class="mobile-menu-btn" id="menu-btn">
+    <i class="ri-menu-line"></i>
+</button>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="products.html">Shop</a></li>
+                <li><a href="login.html" class="active">Login</a></li>
+               
+                <li>
+                    <a href="cart.html" class="cart-link">
+                        <i class="ri-shopping-cart-line"></i>
+                        <span class="cart-count">0</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="auth-container">
+        <div class="auth-header">
+            <h1>Welcome Back</h1>
+            <p>Sign in to your account to continue</p>
+        </div>
+
+        <form id="login-form">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" class="form-control" required>
+                <div class="error-message" id="email-error">Please enter a valid email address</div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" class="form-control" required minlength="6">
+                <div class="error-message" id="password-error">Password must be at least 6 characters</div>
+            </div>
+
+            <div class="form-group" style="display: flex; justify-content: space-between; align-items: center;">
+                <label class="checkbox-container">
+                    <input type="checkbox" id="remember-me">
+                    <span class="checkmark"></span>
+                    Remember me
+                </label>
+                <a href="forgot-password.html" style="font-size: 0.9rem;">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+        </form>
+
+        <div class="social-login">
+            <p>Or sign in with</p>
+            <div class="social-buttons">
+                <button type="button" class="social-btn btn-google">
+                    <i class="ri-google-fill"></i>
+                </button>
+                <button type="button" class="social-btn btn-facebook">
+                    <i class="ri-facebook-fill"></i>
+                </button>
+                <button type="button" class="social-btn btn-twitter">
+                    <i class="ri-twitter-fill"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="auth-footer">
+            Don't have an account? <a href="signup.html">Sign up</a>
+        </div>
+    </div>
+
+    <script type="module" src="assets/js/app.js"></script>
+    <script type="module" src="assets/js/auth.js"></script>
+</body>
+</html>
