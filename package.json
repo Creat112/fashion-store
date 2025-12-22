@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "Root configuration for deployment",
   "scripts": {
-    "start": "node backend/server.js"
+    "start": "node backend/server.js",
+    "build": "echo 'No build step required'"
   },
   "engines": {
     "node": ">=18.0.0"
