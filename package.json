@@ -9,5 +9,11 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "body-parser": "^2.2.1",
+    "cors": "^2.8.5",
+    "express": "^4.22.1",
+    "google-auth-library": "^10.5.0",
+    "sqlite3": "^5.1.7"
+  }
 }
