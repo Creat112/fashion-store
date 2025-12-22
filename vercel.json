@@ -1,0 +1,18 @@
+{
+    "version": 2,
+    "rewrites": [
+        {
+            "source": "/api/:path*",
+            "destination": "/backend/server.js"
+        },
+        {
+            "source": "/(.*)",
+            "destination": "/docs/$1"
+        }
+    ],
+    "functions": {
+        "backend/server.js": {
+            "runtime": "@vercel/node"
+        }
+    }
+}
