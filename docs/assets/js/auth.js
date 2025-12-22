@@ -32,17 +32,6 @@ const handleLogin = async (e) => {
     }
 };
 
-window.handleGoogleLogin = async (response) => {
-    console.log("Google Login callback triggered", response);
-    try {
-        const user = await api.post('/auth/google', { token: response.credential });
-        console.log("Google Auth API Success:", user);
-        finishLogin(user, true); // Always remember google logins or match preference
-    } catch (error) {
-        console.error('Google Login error:', error);
-        alert('Google Sign-In failed: ' + (error.message || 'Unknown error'));
-    }
-};
 
 const finishLogin = (user, remember) => {
     console.log("Finishing login. User:", user);
