@@ -4,6 +4,7 @@ const path = require('path');
 const dbPath = process.env.VERCEL
     ? path.join('/tmp', 'fashion_store.db')
     : path.resolve(__dirname, 'fashion_store.db');
+// Railway allows persistence on the disk, so we use the local path.
 let db;
 
 const initDB = () => {
