@@ -1,11 +1,12 @@
 // assets/js/app.js
-import { updateAuthUI } from './auth.js';
+import { updateAuthUI, initAuth } from './auth.js';
 import { getProducts } from './products.js';
 import { addToCart, updateCartCount, getCartItems, updateCartQuantity, removeFromCart } from './cart.js';
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
     // Auth UI
+    initAuth();
     const currentUser = JSON.parse(localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser'));
     updateAuthUI(currentUser);
 
