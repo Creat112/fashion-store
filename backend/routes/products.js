@@ -67,7 +67,7 @@ router.put('/:id', (req, res) => {
     if (price) { updates.push("price = ?"); params.push(price); }
     if (description) { updates.push("description = ?"); params.push(description); }
     if (category) { updates.push("category = ?"); params.push(category); }
-    if (image) { updates.push("image = ?"); params.push(image); }
+    if (image && image.trim() !== '') { updates.push("image = ?"); params.push(image); }
     if (stock !== undefined) { updates.push("stock = ?"); params.push(stock); }
     if (disabled !== undefined) { updates.push("disabled = ?"); params.push(disabled ? 1 : 0); }
 

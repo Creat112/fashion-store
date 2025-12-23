@@ -108,6 +108,7 @@ const applyTheme = (theme) => {
     document.body.classList.toggle('dark', theme === 'dark');
     localStorage.setItem('admin-theme', theme);
 };
+
 themeToggle.addEventListener('click', () => {
     const current = localStorage.getItem('admin-theme') || 'light';
     applyTheme(current === 'light' ? 'dark' : 'light');
@@ -136,6 +137,11 @@ const getOrders = async () => {
 };
 
 const saveProduct = async (product) => {
+    // If it's an update and image is empty, don't send it to prevent overwriting
+    if (product.id && (!product.image || product.image === '')) {
+        delete product.image;
+    }
+
     if (product.id) {
         return await api.put(`/products/${product.id}`, product);
     } else {
@@ -303,9 +309,14 @@ productForm.addEventListener('submit', async e => {
         price: Number(pPrice.value) || 0,
         stock: Number(pStock.value) || 0,
         category: pCategory.value.trim(),
-        image: imageBase64,
+        image: imageBase64 || '',
         description: pDesc.value.trim()
     };
+
+    // Validation for new products
+    if (!idVal && !product.image) {
+        return alert('Please select an image for the new product');
+    }
     if (idVal) product.id = idVal;
 
     try {
