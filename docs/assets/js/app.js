@@ -27,6 +27,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         const productGrids = document.querySelectorAll('.products-grid');
         if (productGrids.length > 0) {
             await loadProducts();
+
+            // Filter/Sort listeners
+            const categoryFilter = document.getElementById('category-filter');
+            const sortBy = document.getElementById('sort-by');
+
+            if (categoryFilter) {
+                categoryFilter.addEventListener('change', () => {
+                    loadProducts(categoryFilter.value, sortBy ? sortBy.value : null);
+                });
+            }
+
+            if (sortBy) {
+                sortBy.addEventListener('change', () => {
+                    loadProducts(categoryFilter ? categoryFilter.value : null, sortBy.value);
+                });
+            }
         }
 
         // Initialize cart page if present
@@ -62,21 +78,41 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-async function loadProducts() {
+async function loadProducts(category = null, sortBy = null) {
     try {
-        const products = await getProducts();
+        const products = await getProducts(category);
         const containers = document.querySelectorAll('.products-grid');
 
-        if (containers.length === 0 || products.length === 0) return;
+        if (containers.length === 0) return;
+
+        // Sort products client-side
+        if (sortBy) {
+            products.sort((a, b) => {
+                if (sortBy === 'price-asc') return a.price - b.price;
+                if (sortBy === 'price-desc') return b.price - a.price;
+                if (sortBy === 'name-asc') return a.name.localeCompare(b.name);
+                if (sortBy === 'name-desc') return b.name.localeCompare(a.name);
+                return 0;
+            });
+        }
+
+        if (products.length === 0) {
+            containers.forEach(container => {
+                container.innerHTML = '<p class="no-products">No products found for this category.</p>';
+            });
+            return;
+        }
 
         const html = products.map(product => `
             <div class="product-card">
                 <img src="${product.image}" alt="${product.name}" style="width: 100%; height: 200px; object-fit: cover;">
-                <h3>${product.name}</h3>
-                <p class="price" style="color: #e74c3c; font-weight: 600;">$${product.price ? product.price.toFixed(2) : '0.00'}</p>
-                <button class="btn add-to-cart" data-product-id="${product.id}" type="button" style="width: 100%; margin-top: 1rem;">
-                    Add to Cart
-                </button>
+                <div class="product-info" style="padding: 1rem;">
+                    <h3>${product.name}</h3>
+                    <p class="price" style="color: #e74c3c; font-weight: 600;">$${product.price ? product.price.toFixed(2) : '0.00'}</p>
+                    <button class="btn add-to-cart" data-product-id="${product.id}" type="button" style="width: 100%; margin-top: 1rem;">
+                        Add to Cart
+                    </button>
+                </div>
             </div>
         `).join('');
 
