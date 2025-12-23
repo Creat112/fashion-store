@@ -17,6 +17,66 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = 'login.html';
         });
     }
+
+    // Orders Delegation
+    const ordersList = document.getElementById('orders-list');
+    if (ordersList) {
+        ordersList.addEventListener('click', async (e) => {
+            const statusBtn = e.target.closest('.status-toggle');
+            const deleteBtn = e.target.closest('.delete-order');
+
+            if (statusBtn) {
+                const id = statusBtn.dataset.id;
+                console.log('Status toggle clicked for order:', id);
+                const currentStatus = statusBtn.dataset.status;
+                const newStatus = currentStatus === 'completed' ? 'pending' : 'completed';
+                try {
+                    await updateOrderStatus(id, newStatus);
+                    renderOrders();
+                } catch (err) {
+                    console.error('Error updating status:', err);
+                    alert('Failed to update order status');
+                }
+            }
+
+            if (deleteBtn) {
+                const id = deleteBtn.dataset.id;
+                console.log('Delete button clicked for order ID:', id);
+
+                if (deleteBtn.classList.contains('confirming')) {
+                    // Second click - perform deletion
+                    try {
+                        console.log('Confirmed! Sending delete request for order:', id);
+                        deleteBtn.disabled = true;
+                        deleteBtn.textContent = 'Deleting...';
+                        const result = await deleteOrder(id);
+                        console.log('Delete result:', result);
+                        renderOrders();
+                        renderStats();
+                    } catch (err) {
+                        console.error('Error during deletion process:', err);
+                        alert('Failed to delete order: ' + err.message);
+                        deleteBtn.disabled = false;
+                        deleteBtn.textContent = 'Delete';
+                        deleteBtn.classList.remove('confirming');
+                    }
+                } else {
+                    // First click - ask for confirmation
+                    console.log('First click - switching to confirming state');
+                    deleteBtn.classList.add('confirming');
+                    deleteBtn.textContent = 'Click again to confirm';
+
+                    // Reset after 3 seconds if not clicked again
+                    setTimeout(() => {
+                        if (deleteBtn && deleteBtn.classList.contains('confirming')) {
+                            deleteBtn.classList.remove('confirming');
+                            deleteBtn.textContent = 'Delete';
+                        }
+                    }, 3000);
+                }
+            }
+        });
+    }
 });
 
 // DOM elements
@@ -85,6 +145,10 @@ const saveProduct = async (product) => {
 
 const deleteProduct = async (id) => {
     return await api.delete(`/products/${id}`);
+};
+
+const deleteOrder = async (id) => {
+    return await api.delete(`/orders/${id}`);
 };
 
 const updateOrderStatus = async (id, status) => {
@@ -299,22 +363,15 @@ async function renderOrders() {
             </div>
             <div class="actions">
                 <div><strong>$${(o.total || 0).toFixed(2)}</strong></div>
-                <button class="status-toggle ${isCompleted ? 'completed' : ''}" data-id="${o.id}" data-status="${o.status}">
-                    ${isCompleted ? 'Mark as Pending' : 'Mark as Done'}
-                </button>
+                <div style="display: flex; gap: 8px;">
+                    <button class="status-toggle ${isCompleted ? 'completed' : ''}" data-id="${o.id}" data-status="${o.status}">
+                        ${isCompleted ? 'Mark as Pending' : 'Mark as Done'}
+                    </button>
+                    <button class="btn danger delete-order" data-id="${o.id}">Delete</button>
+                </div>
             </div>
         `;
         ordersListEl.appendChild(row);
-    });
-
-    document.querySelectorAll('.status-toggle').forEach(button => {
-        button.addEventListener('click', async (e) => {
-            const id = e.target.dataset.id;
-            const currentStatus = e.target.dataset.status;
-            const newStatus = currentStatus === 'completed' ? 'pending' : 'completed';
-            await updateOrderStatus(id, newStatus);
-            renderOrders();
-        });
     });
 }
 

@@ -107,4 +107,45 @@ router.put('/:id', (req, res) => {
     });
 });
 
+// Delete order
+router.delete('/:id', (req, res) => {
+    const { id } = req.params;
+    const db = getDB();
+
+    db.serialize(() => {
+        db.run('BEGIN TRANSACTION');
+
+        // Delete order items first
+        // We need to find the internal ID if orderNumber was passed
+        db.get("SELECT id FROM orders WHERE id = ? OR orderNumber = ?", [id, id], (err, row) => {
+            if (err || !row) {
+                db.run('ROLLBACK');
+                return res.status(err ? 500 : 404).json({ error: err ? err.message : 'Order not found' });
+            }
+
+            const internalId = row.id;
+
+            db.run('DELETE FROM order_items WHERE orderId = ?', [internalId], (err) => {
+                if (err) {
+                    db.run('ROLLBACK');
+                    return res.status(500).json({ error: err.message });
+                }
+
+                // Delete the order
+                db.run('DELETE FROM orders WHERE id = ?', [internalId], function (err) {
+                    if (err) {
+                        db.run('ROLLBACK');
+                        return res.status(500).json({ error: err.message });
+                    }
+
+                    db.run('COMMIT', (err) => {
+                        if (err) return res.status(500).json({ error: err.message });
+                        res.json({ success: true });
+                    });
+                });
+            });
+        });
+    });
+});
+
 module.exports = router;
