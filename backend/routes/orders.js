@@ -53,6 +53,8 @@ router.get('/', (req, res) => {
     });
 });
 
+const { sendOrderEmail } = require('../utils/email');
+
 // Create new order
 router.post('/', (req, res) => {
     const { customer, shipping, items, total, orderNumber, date } = req.body;
@@ -79,15 +81,49 @@ router.post('/', (req, res) => {
 
             const orderId = this.lastID;
             const itemStmt = db.prepare(`INSERT INTO order_items (orderId, productId, quantity, price, productName) VALUES (?, ?, ?, ?, ?)`);
+            const stockUpdateStmt = db.prepare(`
+                UPDATE products 
+                SET stock = stock - ?, 
+                    disabled = CASE WHEN (stock - ?) <= 0 THEN 1 ELSE 0 END 
+                WHERE id = ?
+            `);
 
             items.forEach(item => {
-                itemStmt.run(orderId, item.productId || item.id, item.quantity, item.price, item.name);
+                const productId = Number(item.productId || item.id);
+                const qty = Number(item.quantity) || 0;
+                const price = Number(item.price) || 0;
+                const name = item.name || item.productName || 'Unknown Product';
+
+                console.log(`Processing item: ${name} (ID: ${productId}), Qty: ${qty}`);
+
+                itemStmt.run(orderId, productId, qty, price, name);
+                stockUpdateStmt.run(qty, qty, productId, function (err) {
+                    if (err) {
+                        console.error(`Error updating stock for product ${productId}:`, err.message);
+                    } else {
+                        console.log(`Product ${productId} stock updated. Rows affected: ${this.changes}`);
+                    }
+                });
             });
 
             itemStmt.finalize(() => {
-                db.run('COMMIT', (err) => {
-                    if (err) return res.status(500).json({ error: err.message });
-                    res.status(201).json({ success: true, orderId });
+                stockUpdateStmt.finalize(() => {
+                    db.run('COMMIT', (err) => {
+                        if (err) {
+                            console.error('Commit failed:', err.message);
+                            return res.status(500).json({ error: err.message });
+                        }
+                        console.log('Order and stock updates committed successfully.');
+
+                        // Send Email Notification (Async)
+                        sendOrderEmail({ customer, shipping, items, total, orderNumber, date })
+                            .then(success => {
+                                if (success) console.log('Admin notified via email.');
+                                else console.warn('Admin email notification failed.');
+                            });
+
+                        res.status(201).json({ success: true, orderId });
+                    });
                 });
             });
         });
