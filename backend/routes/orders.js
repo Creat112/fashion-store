@@ -71,32 +71,47 @@ router.post('/', (req, res) => {
         db.run('BEGIN TRANSACTION');
 
         // CRITICAL: Validate stock for all items BEFORE creating order
-        let stockValidationPromises = [];
-        let stockErrors = [];
+        const validateStock = () => {
+            return new Promise((resolve, reject) => {
+                let stockErrors = [];
+                let completedChecks = 0;
+                const totalChecks = items.length;
 
-        items.forEach((item, index) => {
-            const colorId = item.colorId;
-            const qty = Number(item.quantity) || 0;
-
-            if (!colorId) {
-                stockErrors.push(`Item ${index + 1} (${item.name}) is missing color selection`);
-                return;
-            }
-
-            // Check stock synchronously in the transaction
-            db.get("SELECT stock FROM product_colors WHERE id = ?", [colorId], (err, colorRow) => {
-                if (err) {
-                    stockErrors.push(`Error checking stock for ${item.name}: ${err.message}`);
-                } else if (!colorRow) {
-                    stockErrors.push(`Color variant not found for ${item.name}`);
-                } else if (colorRow.stock < qty) {
-                    stockErrors.push(`Insufficient stock for ${item.name}. Available: ${colorRow.stock}, Requested: ${qty}`);
+                if (totalChecks === 0) {
+                    return resolve([]);
                 }
-            });
-        });
 
-        // Wait a tick to let stock checks complete
-        setTimeout(() => {
+                items.forEach((item, index) => {
+                    const colorId = item.colorId;
+                    const qty = Number(item.quantity) || 0;
+
+                    if (!colorId) {
+                        stockErrors.push(`Item ${index + 1} (${item.name}) is missing color selection`);
+                        completedChecks++;
+                        if (completedChecks === totalChecks) resolve(stockErrors);
+                        return;
+                    }
+
+                    // Check stock synchronously in the transaction
+                    db.get("SELECT stock FROM product_colors WHERE id = ?", [colorId], (err, colorRow) => {
+                        if (err) {
+                            stockErrors.push(`Error checking stock for ${item.name}: ${err.message}`);
+                        } else if (!colorRow) {
+                            stockErrors.push(`Color variant not found for ${item.name}`);
+                        } else if (colorRow.stock < qty) {
+                            stockErrors.push(`Insufficient stock for ${item.name}. Available: ${colorRow.stock}, Requested: ${qty}`);
+                        }
+                        
+                        completedChecks++;
+                        if (completedChecks === totalChecks) {
+                            resolve(stockErrors);
+                        }
+                    });
+                });
+            });
+        };
+
+        validateStock().then(stockErrors => {
             if (stockErrors.length > 0) {
                 db.run('ROLLBACK');
                 return res.status(400).json({
@@ -125,6 +140,9 @@ router.post('/', (req, res) => {
                     WHERE id = ? AND stock >= ?
                 `);
 
+                let itemsProcessed = 0;
+                const totalItems = items.length;
+
                 items.forEach(item => {
                     const productId = Number(item.productId || item.id);
                     const qty = Number(item.quantity) || 0;
@@ -146,32 +164,39 @@ router.post('/', (req, res) => {
                         } else {
                             console.log(`Color ${colorId} stock updated. Rows affected: ${this.changes}`);
                         }
-                    });
-                });
+                        
+                        itemsProcessed++;
+                        if (itemsProcessed === totalItems) {
+                            itemStmt.finalize(() => {
+                                stockUpdateStmt.finalize(() => {
+                                    db.run('COMMIT', (err) => {
+                                        if (err) {
+                                            console.error('Commit failed:', err.message);
+                                            return res.status(500).json({ error: err.message });
+                                        }
+                                        console.log('Order and stock updates committed successfully.');
 
-                itemStmt.finalize(() => {
-                    stockUpdateStmt.finalize(() => {
-                        db.run('COMMIT', (err) => {
-                            if (err) {
-                                console.error('Commit failed:', err.message);
-                                return res.status(500).json({ error: err.message });
-                            }
-                            console.log('Order and stock updates committed successfully.');
+                                        // Send Email Notification (Async)
+                                        sendOrderEmail({ customer, shipping, items, total, orderNumber, date })
+                                            .then(success => {
+                                                if (success) console.log('Admin notified via email.');
+                                                else console.warn('Admin email notification failed.');
+                                            });
 
-                            // Send Email Notification (Async)
-                            sendOrderEmail({ customer, shipping, items, total, orderNumber, date })
-                                .then(success => {
-                                    if (success) console.log('Admin notified via email.');
-                                    else console.warn('Admin email notification failed.');
+                                        res.status(201).json({ success: true, orderId });
+                                    });
                                 });
-
-                            res.status(201).json({ success: true, orderId });
-                        });
+                            });
+                        }
                     });
                 });
             });
             stmt.finalize();
-        }, 100); // Small delay to ensure stock checks complete
+        }).catch(err => {
+            db.run('ROLLBACK');
+            console.error('Stock validation error:', err);
+            return res.status(500).json({ error: 'Stock validation failed', details: err.message });
+        });
     });
 });
 
