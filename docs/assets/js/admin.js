@@ -97,8 +97,12 @@ const pStock = document.getElementById('p-stock');
 const pCategory = document.getElementById('p-category');
 const pImage = document.getElementById('p-image');
 const pDesc = document.getElementById('p-desc');
+const pDiscount = document.getElementById('p-discount');
+const pOriginalPrice = document.getElementById('p-original-price');
 const productFormTitle = document.getElementById('product-form-title');
 const productCancel = document.getElementById('product-cancel');
+const colorsContainer = document.getElementById('colors-container');
+const addColorBtn = document.getElementById('add-color-btn');
 
 const themeToggle = document.getElementById('theme-toggle');
 const exportBtn = document.getElementById('export-orders');
@@ -208,16 +212,147 @@ tabs.forEach(t => t.addEventListener('click', () => {
 }));
 
 // -------------------------
-// Image Base64 storage
+// Image Base64 storage with compression
 // -------------------------
 let imageBase64 = '';
-pImage.addEventListener('change', e => {
+
+// Compress image before converting to base64
+function compressImage(file, maxWidth = 800, maxHeight = 800, quality = 0.7) {
+    return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        
+        img.onload = () => {
+            // Calculate new dimensions
+            let { width, height } = img;
+            
+            if (width > maxWidth || height > maxHeight) {
+                const ratio = Math.min(maxWidth / width, maxHeight / height);
+                width *= ratio;
+                height *= ratio;
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            
+            // Draw and compress
+            ctx.drawImage(img, 0, 0, width, height);
+            canvas.toBlob(resolve, 'image/jpeg', quality);
+        };
+        
+        img.src = URL.createObjectURL(file);
+    });
+}
+
+pImage.addEventListener('change', async e => {
     const file = e.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => imageBase64 = reader.result;
-    reader.readAsDataURL(file);
+    
+    try {
+        const compressedBlob = await compressImage(file);
+        const reader = new FileReader();
+        reader.onload = () => imageBase64 = reader.result;
+        reader.readAsDataURL(compressedBlob);
+    } catch (err) {
+        console.error('Error compressing image:', err);
+        // Fallback to original file
+        const reader = new FileReader();
+        reader.onload = () => imageBase64 = reader.result;
+        reader.readAsDataURL(file);
+    }
 });
+
+// -------------------------
+// Discount calculation
+// -------------------------
+pDiscount.addEventListener('input', () => {
+    const price = parseFloat(pPrice.value) || 0;
+    const discount = parseFloat(pDiscount.value) || 0;
+
+    if (discount > 0 && price > 0) {
+        const originalPrice = price / (1 - discount / 100);
+        pOriginalPrice.value = originalPrice.toFixed(2);
+    } else {
+        pOriginalPrice.value = '';
+    }
+});
+
+pPrice.addEventListener('input', () => {
+    const price = parseFloat(pPrice.value) || 0;
+    const discount = parseFloat(pDiscount.value) || 0;
+
+    if (discount > 0 && price > 0) {
+        const originalPrice = price / (1 - discount / 100);
+        pOriginalPrice.value = originalPrice.toFixed(2);
+    }
+});
+
+// -------------------------
+// Color Management
+// -------------------------
+let colorCounter = 0;
+
+function addColorInput(color = null) {
+    const colorId = color?.id || `temp-${colorCounter++}`;
+    const colorDiv = document.createElement('div');
+    colorDiv.className = 'color-input-group';
+    colorDiv.dataset.colorId = colorId;
+    // Store existing image if editing
+    if (color?.image) {
+        colorDiv.dataset.existingImage = color.image;
+    }
+    colorDiv.innerHTML = `
+        <input type="text" placeholder="Color Name" class="color-name" value="${color?.colorName || ''}" required>
+        <input type="color" class="color-code" value="${color?.colorCode || '#000000'}" title="Color Code">
+        <input type="number" step="0.01" placeholder="Price" class="color-price" value="${color?.price || ''}" required>
+        <input type="number" placeholder="Stock" class="color-stock" value="${color?.stock || 0}" required>
+        <label>Image <input type="file" accept="image/*" class="color-image" title="Variant Image"></label>
+        <img class="color-image-preview" src="${color?.image || ''}" style="max-width:50px; margin-top:4px; display:${color?.image ? 'block' : 'none'};" />
+        <button type="button" class="btn danger remove-color">Remove</button>
+    `;
+
+    // Handle preview update on file selection
+    const fileInput = colorDiv.querySelector('.color-image');
+    const previewImg = colorDiv.querySelector('.color-image-preview');
+    fileInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            try {
+                const compressedBlob = await compressImage(file, 400, 400, 0.8);
+                const reader = new FileReader();
+                reader.onload = () => {
+                    previewImg.src = reader.result;
+                    previewImg.style.display = 'block';
+                    // Store compressed base64 for submission
+                    colorDiv.dataset.existingImage = reader.result;
+                };
+                reader.readAsDataURL(compressedBlob);
+            } catch (err) {
+                console.error('Error compressing color image:', err);
+                // Fallback to original
+                const reader = new FileReader();
+                reader.onload = () => {
+                    previewImg.src = reader.result;
+                    previewImg.style.display = 'block';
+                    colorDiv.dataset.existingImage = reader.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        } else {
+            previewImg.style.display = 'none';
+            delete colorDiv.dataset.existingImage;
+        }
+    });
+
+    colorDiv.querySelector('.remove-color').addEventListener('click', () => {
+        colorDiv.remove();
+    });
+
+    colorsContainer.appendChild(colorDiv);
+}
+
+addColorBtn.addEventListener('click', () => addColorInput());
 
 // -------------------------
 // Render Products
@@ -266,7 +401,18 @@ async function renderProducts() {
                 pStock.value = p.stock ?? 0;
                 pCategory.value = p.category || '';
                 pDesc.value = p.description || '';
+                pDiscount.value = p.discount || 0;
+                pOriginalPrice.value = p.originalPrice || '';
                 imageBase64 = p.image || '';
+
+                // Load colors
+                colorsContainer.innerHTML = '';
+                if (p.colors && p.colors.length > 0) {
+                    p.colors.forEach(color => addColorInput(color));
+                } else {
+                    addColorInput(); // Add one empty color input
+                }
+
                 productFormTitle.textContent = 'Edit Product';
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
@@ -304,13 +450,69 @@ productForm.addEventListener('submit', async e => {
     e.preventDefault();
     const idVal = pId.value ? Number(pId.value) : null;
 
+    // Helper to convert a File to compressed base64 data URL
+    async function fileToBase64(file) {
+        try {
+            const compressedBlob = await compressImage(file, 400, 400, 0.8);
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = err => reject(err);
+                reader.readAsDataURL(compressedBlob);
+            });
+        } catch (err) {
+            console.error('Error compressing image in form submission:', err);
+            // Fallback to original file
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = err => reject(err);
+                reader.readAsDataURL(file);
+            });
+        }
+    }
+
+    // Collect colors (updated to handle variant images)
+    const colorInputs = colorsContainer.querySelectorAll('.color-input-group');
+    const colors = [];
+    
+    for (const colorDiv of colorInputs) {
+        const colorName = colorDiv.querySelector('.color-name').value.trim();
+        const colorCode = colorDiv.querySelector('.color-code').value;
+        const colorPrice = parseFloat(colorDiv.querySelector('.color-price').value);
+        const colorStock = parseInt(colorDiv.querySelector('.color-stock').value) || 0;
+        let imageData = '';
+        const fileInput = colorDiv.querySelector('.color-image');
+        if (fileInput && fileInput.files.length > 0) {
+            imageData = await fileToBase64(fileInput.files[0]);
+        } else if (colorDiv.dataset.existingImage) {
+            imageData = colorDiv.dataset.existingImage;
+        }
+        if (colorName && colorPrice) {
+            colors.push({
+                colorName,
+                colorCode,
+                price: colorPrice,
+                stock: colorStock,
+                image: imageData
+            });
+        }
+    }
+
+    if (colors.length === 0) {
+        return alert('Please add at least one color variant');
+    }
+
     const product = {
         name: pName.value.trim(),
         price: Number(pPrice.value) || 0,
         stock: Number(pStock.value) || 0,
         category: pCategory.value.trim(),
         image: imageBase64 || '',
-        description: pDesc.value.trim()
+        description: pDesc.value.trim(),
+        discount: Number(pDiscount.value) || 0,
+        originalPrice: pOriginalPrice.value ? Number(pOriginalPrice.value) : null,
+        colors: colors
     };
 
     // Validation for new products
@@ -324,6 +526,10 @@ productForm.addEventListener('submit', async e => {
         productForm.reset();
         pId.value = '';
         imageBase64 = '';
+        pDiscount.value = 0;
+        pOriginalPrice.value = '';
+        colorsContainer.innerHTML = '';
+        addColorInput(); // Add one empty color input
         productFormTitle.textContent = 'Add Product';
         renderProducts();
         alert('Product saved');
@@ -337,6 +543,10 @@ productCancel.addEventListener('click', () => {
     productForm.reset();
     pId.value = '';
     imageBase64 = '';
+    pDiscount.value = 0;
+    pOriginalPrice.value = '';
+    colorsContainer.innerHTML = '';
+    addColorInput(); // Add one empty color input
     productFormTitle.textContent = 'Add Product';
 });
 
@@ -434,6 +644,7 @@ exportBtn.addEventListener('click', async () => {
 });
 
 // Initial Load
+addColorInput(); // Add initial color input
 renderProducts();
 renderOrders();
 renderStats();

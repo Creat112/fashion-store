@@ -298,6 +298,82 @@ input[type="file"] {
   }
 }
 
+/* Discount Section */
+.discount-section {
+  grid-column: span 2;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 10px;
+  background: rgba(52, 152, 219, 0.05);
+  border-radius: 6px;
+  border: 1px solid rgba(52, 152, 219, 0.2);
+}
+
+/* Colors Section */
+.colors-section {
+  grid-column: span 2;
+  padding: 15px;
+  background: rgba(46, 204, 113, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(46, 204, 113, 0.2);
+}
+
+.colors-section h4 {
+  margin: 0 0 15px 0;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+#colors-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.color-input-group {
+  display: grid;
+  grid-template-columns: 2fr 80px 1.5fr 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 10px;
+  background: var(--bg);
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.color-input-group input {
+  margin: 0;
+  padding: 6px 8px;
+  font-size: 13px;
+}
+
+.color-input-group .color-code {
+  width: 70px;
+  height: 35px;
+  padding: 2px;
+  cursor: pointer;
+}
+
+.color-input-group .remove-color {
+  padding: 6px 12px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+#add-color-btn {
+  background: #27ae60;
+  color: white;
+  padding: 8px 16px;
+  font-weight: 600;
+}
+
+#add-color-btn:hover {
+  background: #229954;
+}
+
 /* responsive */
 @media (max-width:900px) {
   .admin-app {
@@ -314,5 +390,18 @@ input[type="file"] {
 
   .product-form {
     grid-template-columns: 1fr
+  }
+
+  .discount-section {
+    grid-template-columns: 1fr;
+  }
+
+  .color-input-group {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .color-input-group .color-code {
+    width: 100%;
   }
 }

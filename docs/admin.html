@@ -37,12 +37,27 @@
           <form id="product-form" class="product-form">
             <h3 id="product-form-title">Add Product</h3>
             <input type="hidden" id="product-id">
+
             <label> Name <input id="p-name" required></label>
-            <label> Price <input id="p-price" type="number" step="0.01" required></label>
-            <label> Stock <input id="p-stock" type="number" required></label>
+            <label> Base Price <input id="p-price" type="number" step="0.01" required></label>
+
+            <div class="discount-section">
+              <label> Discount (%) <input id="p-discount" type="number" min="0" max="100" step="0.1" value="0"></label>
+              <label> Original Price (auto-calculated) <input id="p-original-price" type="number" step="0.01"
+                  readonly></label>
+            </div>
+
+            <label> Stock (total) <input id="p-stock" type="number" value="0"></label>
             <label> Category <input id="p-category"></label>
-            <label> Image URL <input id="p-image" type="file" accept="image/*"></label>
+            <label> Image <input id="p-image" type="file" accept="image/*"></label>
             <label> Description <textarea id="p-desc"></textarea></label>
+
+            <div class="colors-section">
+              <h4>Color Variants</h4>
+              <div id="colors-container"></div>
+              <button type="button" id="add-color-btn" class="btn">+ Add Color</button>
+            </div>
+
             <div class="form-actions">
               <button type="submit" class="btn primary">Save</button>
               <button type="button" id="product-cancel" class="btn">Cancel</button>

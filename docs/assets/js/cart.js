@@ -5,7 +5,7 @@ const getUserId = () => {
     return user ? user.id : null;
 };
 
-export const addToCart = async (productId, quantity = 1) => {
+export const addToCart = async (productId, quantity = 1, colorId = null) => {
     const userId = getUserId();
     if (!userId) {
         alert("Please login to add items to cart");
@@ -13,12 +13,17 @@ export const addToCart = async (productId, quantity = 1) => {
         return;
     }
 
+    if (!colorId) {
+        throw new Error('Please select a color before adding to cart');
+    }
+
     try {
-        await api.post('/cart', { productId, quantity, userId });
+        await api.post('/cart', { productId, quantity, userId, colorId });
         await updateCartCount();
     } catch (error) {
         console.error('Add to cart error:', error);
-        alert('Failed to add to cart: ' + error.message);
+        // Re-throw with meaningful message
+        throw new Error(error.error || error.message || 'Failed to add to cart');
     }
 };
 

@@ -103,18 +103,60 @@ async function loadProducts(category = null, sortBy = null) {
             return;
         }
 
-        const html = products.map(product => `
-            <div class="product-card">
-                <img src="${product.image}" alt="${product.name}" style="width: 100%; height: 200px; object-fit: cover;">
-                <div class="product-info" style="padding: 1rem;">
-                    <h3>${product.name}</h3>
-                    <p class="price" style="color: #e74c3c; font-weight: 600;">$${product.price ? product.price.toFixed(2) : '0.00'}</p>
-                    <button class="btn add-to-cart" data-product-id="${product.id}" type="button" style="width: 100%; margin-top: 1rem;">
-                        Add to Cart
-                    </button>
+        const html = products.map(product => {
+            const hasDiscount = product.discount && product.discount > 0;
+            const hasColors = product.colors && product.colors.length > 0;
+
+            // Calculate total stock from all colors
+            const totalStock = hasColors
+                ? product.colors.reduce((sum, color) => sum + (color.stock || 0), 0)
+                : product.stock || 0;
+
+            // Determine stock badge
+            let stockBadgeClass = 'out-of-stock';
+            let stockBadgeText = 'Out of Stock';
+            if (totalStock > 10) {
+                stockBadgeClass = 'in-stock';
+                stockBadgeText = 'In Stock';
+            } else if (totalStock > 0) {
+                stockBadgeClass = 'low-stock';
+                stockBadgeText = `Only ${totalStock} left`;
+            }
+
+            return `
+                <div class="product-card" onclick="window.location.href='product-detail.html?id=${product.id}'">
+                    <span class="stock-badge ${stockBadgeClass}">${stockBadgeText}</span>
+                    <img src="${product.image}" alt="${product.name}">
+                    <div class="product-info">
+                        ${product.category ? `<p class="category">${product.category}</p>` : ''}
+                        <h3>${product.name}</h3>
+                        
+                        <div class="price-container">
+                            ${hasDiscount ? `
+                                <span class="original-price">$${product.originalPrice.toFixed(2)}</span>
+                                <span class="price decreased">$${product.price.toFixed(2)}</span>
+                                
+                            ` : `
+                                <span class="price">$${product.price ? product.price.toFixed(2) : '0.00'}</span>
+                            `}
+                        </div>
+
+                        ${hasColors ? `
+                            <div class="color-preview">
+                                ${product.colors.slice(0, 5).map(color => `
+                                    <div 
+                                        class="color-dot" 
+                                        style="background-color: ${color.colorCode}; ${color.colorCode === '#FFFFFF' || color.colorCode === '#ffffff' ? 'border-color: #999;' : ''}"
+                                        title="${color.colorName}"
+                                    ></div>
+                                `).join('')}
+                                ${product.colors.length > 5 ? `<span style="font-size: 0.85rem; color: #666;">+${product.colors.length - 5} more</span>` : ''}
+                            </div>
+                        ` : ''}
+                    </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
 
         containers.forEach(container => {
             container.innerHTML = html;
