@@ -2,13 +2,6 @@ const nodemailer = require('nodemailer');
 
 const sendOrderEmail = async (orderData) => {
     try {
-        // Debug: Log the actual order data received
-        console.log('=== EMAIL DEBUG: Order Data Received ===');
-        console.log('Customer:', JSON.stringify(orderData.customer, null, 2));
-        console.log('Shipping:', JSON.stringify(orderData.shipping, null, 2));
-        console.log('Items:', JSON.stringify(orderData.items, null, 2));
-        console.log('==========================================');
-
         // Create a transporter
         // NOTE: For production, use environment variables!
         const transporter = nodemailer.createTransport({
