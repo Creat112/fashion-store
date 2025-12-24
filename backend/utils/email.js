@@ -2,6 +2,13 @@ const nodemailer = require('nodemailer');
 
 const sendOrderEmail = async (orderData) => {
     try {
+        // Debug: Log the actual order data received
+        console.log('=== EMAIL DEBUG: Order Data Received ===');
+        console.log('Customer:', JSON.stringify(orderData.customer, null, 2));
+        console.log('Shipping:', JSON.stringify(orderData.shipping, null, 2));
+        console.log('Items:', JSON.stringify(orderData.items, null, 2));
+        console.log('==========================================');
+
         // Create a transporter
         // NOTE: For production, use environment variables!
         const transporter = nodemailer.createTransport({
@@ -12,37 +19,73 @@ const sendOrderEmail = async (orderData) => {
             }
         });
 
-        const itemsHtml = orderData.items.map(item =>
-            `<li>${item.name || item.productName} × ${item.quantity} - $${(item.price * item.quantity).toFixed(2)}</li>`
-        ).join('');
+        const itemsHtml = orderData.items.map(item => `
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.name || item.productName}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.colorName || 'N/A'}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${item.quantity}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">$${item.price.toFixed(2)}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">$${(item.price * item.quantity).toFixed(2)}</td>
+            </tr>
+        `).join('');
 
         const mailOptions = {
             from: '"Fashion Store" <' + (process.env.EMAIL_USER || 'placeholder@gmail.com') + '>',
             to: 'sasaabdelhady333@gmail.com',
             subject: `New Order Received: ${orderData.orderNumber}`,
             html: `
-                <h1>New Order Received!</h1>
-                <p><strong>Order Number:</strong> ${orderData.orderNumber}</p>
-                <p><strong>Date:</strong> ${new Date(orderData.date).toLocaleString()}</p>
-                <p><strong>Total:</strong> $${orderData.total.toFixed(2)}</p>
-                
-                <h3>Customer Details:</h3>
-                <p>
-                    ${orderData.customer.fullName}<br>
-                    ${orderData.customer.email}<br>
-                    ${orderData.customer.phone}
-                </p>
-                
-                <h3>Shipping Address:</h3>
-                <p>
-                    ${orderData.shipping.address}<br>
-                    ${orderData.shipping.city}, ${orderData.shipping.governorate}
-                </p>
-                
-                <h3>Items:</h3>
-                <ul>
-                    ${itemsHtml}
-                </ul>
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h1 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">New Order Received!</h1>
+                    
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                        <p style="margin: 5px 0;"><strong>Order Number:</strong> ${orderData.orderNumber}</p>
+                        <p style="margin: 5px 0;"><strong>Date:</strong> ${new Date(orderData.date).toLocaleString()}</p>
+                        <p style="margin: 5px 0;"><strong>Total:</strong> <span style="color: #28a745; font-size: 18px;">$${orderData.total.toFixed(2)}</span></p>
+                    </div>
+                    
+                    <h3 style="color: #333;">Customer Details:</h3>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                        <p style="margin: 5px 0;"><strong>Name:</strong> ${orderData.customer.fullName}</p>
+                        <p style="margin: 5px 0;"><strong>Email:</strong> ${orderData.customer.email}</p>
+                        <p style="margin: 5px 0;"><strong>Phone:</strong> ${orderData.customer.phone}</p>
+                        ${orderData.customer.secondaryPhone ? `<p style="margin: 5px 0;"><strong>Secondary Phone:</strong> ${orderData.customer.secondaryPhone}</p>` : ''}
+                    </div>
+                    
+                    <h3 style="color: #333;">Shipping Address:</h3>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                        <p style="margin: 5px 0;"><strong>Address:</strong> ${orderData.shipping.address}</p>
+                        <p style="margin: 5px 0;"><strong>City:</strong> ${orderData.shipping.city}</p>
+                        <p style="margin: 5px 0;"><strong>Governorate:</strong> ${orderData.shipping.governorate}</p>
+                        ${orderData.shipping.notes ? `<p style="margin: 5px 0;"><strong>Notes:</strong> ${orderData.shipping.notes}</p>` : ''}
+                        ${orderData.shipping.location ? `<p style="margin: 5px 0;"><strong>Location:</strong> Lat: ${orderData.shipping.location.lat}, Lng: ${orderData.shipping.location.lng}</p>` : ''}
+                    </div>
+                    
+                    <h3 style="color: #333;">Order Items:</h3>
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                        <thead>
+                            <tr style="background: #007bff; color: white;">
+                                <th style="padding: 10px; text-align: left;">Product</th>
+                                <th style="padding: 10px; text-align: left;">Color</th>
+                                <th style="padding: 10px; text-align: center;">Quantity</th>
+                                <th style="padding: 10px; text-align: right;">Price</th>
+                                <th style="padding: 10px; text-align: right;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${itemsHtml}
+                        </tbody>
+                        <tfoot>
+                            <tr style="background: #f8f9fa; font-weight: bold;">
+                                <td colspan="4" style="padding: 10px; text-align: right;">Total:</td>
+                                <td style="padding: 10px; text-align: right; color: #28a745;">$${orderData.total.toFixed(2)}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    
+                    <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666;">
+                        <p>This is an automated notification from Fashion Store.</p>
+                    </div>
+                </div>
             `
         };
 

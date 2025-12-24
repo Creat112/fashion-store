@@ -13,7 +13,7 @@ router.get('/', (req, res) => {
     // Join with products and product_colors to get details immediately
     const query = `
         SELECT c.*, p.name, p.price, p.image, p.discount, p.originalPrice,
-               pc.colorName, pc.colorCode, pc.price as colorPrice, pc.stock as colorStock
+               pc.colorName, pc.colorCode, pc.price as colorPrice, pc.stock as colorStock, pc.image as colorImage
         FROM cart c 
         JOIN products p ON c.productId = p.id
         LEFT JOIN product_colors pc ON c.colorId = pc.id

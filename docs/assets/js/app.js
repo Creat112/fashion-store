@@ -191,11 +191,17 @@ async function renderCartPage() {
             // item already includes product details from the API join
             const line = item.price * item.quantity;
             subtotal += line;
+            
+            // Use color-specific image if available, otherwise main product image
+            const displayImage = item.colorImage || item.image;
+            const colorDisplay = item.colorName ? `<p class="color-info">Color: ${item.colorName}</p>` : '';
+            
             return `
             <div class="cart-item" data-id="${item.id}" data-product-id="${item.productId}">
-                <img src="${item.image}" alt="${item.name}" class="cart-item-image" style="width: 80px; height: 80px; object-fit: cover; margin-right: 1rem;" />
+                <img src="${displayImage}" alt="${item.name}" class="cart-item-image" style="width: 80px; height: 80px; object-fit: cover; margin-right: 1rem;" />
                 <div class="cart-item-details" style="flex: 1;">
                     <h3>${item.name}</h3>
+                    ${colorDisplay}
                     <p class="price">$${item.price.toFixed(2)}</p>
                     <div class="quantity-controls" style="margin: 0.5rem 0;">
                         <input type="number" class="qty-input" min="1" value="${item.quantity}" style="width: 50px;" />

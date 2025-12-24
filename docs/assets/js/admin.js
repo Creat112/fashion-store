@@ -293,6 +293,17 @@ pPrice.addEventListener('input', () => {
 // -------------------------
 let colorCounter = 0;
 
+// Function to calculate total stock from color variants
+function calculateTotalStock() {
+    const colorInputs = colorsContainer.querySelectorAll('.color-input-group');
+    let totalStock = 0;
+    colorInputs.forEach(colorDiv => {
+        const stockInput = colorDiv.querySelector('.color-stock');
+        totalStock += parseInt(stockInput.value) || 0;
+    });
+    pStock.value = totalStock;
+}
+
 function addColorInput(color = null) {
     const colorId = color?.id || `temp-${colorCounter++}`;
     const colorDiv = document.createElement('div');
@@ -311,6 +322,10 @@ function addColorInput(color = null) {
         <img class="color-image-preview" src="${color?.image || ''}" style="max-width:50px; margin-top:4px; display:${color?.image ? 'block' : 'none'};" />
         <button type="button" class="btn danger remove-color">Remove</button>
     `;
+
+    // Add event listener to stock input to recalculate total
+    const stockInput = colorDiv.querySelector('.color-stock');
+    stockInput.addEventListener('input', calculateTotalStock);
 
     // Handle preview update on file selection
     const fileInput = colorDiv.querySelector('.color-image');
@@ -347,9 +362,13 @@ function addColorInput(color = null) {
 
     colorDiv.querySelector('.remove-color').addEventListener('click', () => {
         colorDiv.remove();
+        calculateTotalStock(); // Recalculate when removing a color
     });
 
     colorsContainer.appendChild(colorDiv);
+    
+    // Calculate total stock after adding new color
+    calculateTotalStock();
 }
 
 addColorBtn.addEventListener('click', () => addColorInput());
@@ -409,6 +428,8 @@ async function renderProducts() {
                 colorsContainer.innerHTML = '';
                 if (p.colors && p.colors.length > 0) {
                     p.colors.forEach(color => addColorInput(color));
+                    // Calculate total stock after loading colors
+                    calculateTotalStock();
                 } else {
                     addColorInput(); // Add one empty color input
                 }
@@ -506,7 +527,7 @@ productForm.addEventListener('submit', async e => {
     const product = {
         name: pName.value.trim(),
         price: Number(pPrice.value) || 0,
-        stock: Number(pStock.value) || 0,
+        stock: Number(pStock.value) || 0, // This is now calculated from color variants
         category: pCategory.value.trim(),
         image: imageBase64 || '',
         description: pDesc.value.trim(),
@@ -579,7 +600,7 @@ async function renderOrders() {
                 </div>
                 <div class="small-muted">${o.customer?.fullName || '—'} — ${o.shipping?.address || ''}</div>
                 <div class="order-items">
-                    ${(o.items || []).map(it => `<div>${it.name} × ${it.quantity} • $${(it.price * it.quantity).toFixed(2)}</div>`).join('')}
+                    ${(o.items || []).map(it => `<div>${it.name} × ${it.quantity} • $${(it.price * it.quantity).toFixed(2)}${it.colorName ? ` (${it.colorName})` : ''}</div>`).join('')}
                 </div>
             </div>
             <div class="actions">

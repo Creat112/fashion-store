@@ -28,8 +28,11 @@ window.addEventListener("DOMContentLoaded", () => {
 
             li.innerHTML = `
                 <div style="display:flex; align-items:center; gap:10px">
-                    <img src="${item.image}" width="50" style="object-fit:cover; height:50px; border-radius:4px" />
-                    <span>${item.name} × ${item.quantity}</span>
+                    <img src="${item.colorImage || item.image}" width="50" style="object-fit:cover; height:50px; border-radius:4px" />
+                    <div>
+                        <span>${item.name} × ${item.quantity}</span>
+                        ${item.colorName ? `<br><small style="color:#666">Color: ${item.colorName}</small>` : ''}
+                    </div>
                 </div>
                 <b>$${(item.price * item.quantity).toFixed(2)}</b>
             `;

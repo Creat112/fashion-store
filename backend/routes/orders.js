@@ -6,7 +6,7 @@ const { getDB } = require('../database/init');
 router.get('/', (req, res) => {
     const db = getDB();
     const query = `
-        SELECT o.*, i.productId, i.quantity, i.price, i.productName 
+        SELECT o.*, i.productId, i.quantity, i.price, i.productName, i.colorId, i.colorName
         FROM orders o 
         LEFT JOIN order_items i ON o.id = i.orderId
         ORDER BY o.date DESC
@@ -44,7 +44,9 @@ router.get('/', (req, res) => {
                     productId: row.productId,
                     quantity: row.quantity,
                     price: row.price,
-                    name: row.productName
+                    name: row.productName,
+                    colorId: row.colorId,
+                    colorName: row.colorName
                 });
             }
         });
