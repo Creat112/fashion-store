@@ -2,6 +2,10 @@ const nodemailer = require('nodemailer');
 
 const sendOrderEmail = async (orderData) => {
     try {
+        console.log('=== EMAIL SENDING START ===');
+        console.log('Email user:', process.env.EMAIL_USER);
+        console.log('Order data:', JSON.stringify(orderData, null, 2));
+        
         // Create a transporter
         // NOTE: For production, use environment variables!
         const transporter = nodemailer.createTransport({
@@ -84,9 +88,13 @@ const sendOrderEmail = async (orderData) => {
 
         const info = await transporter.sendMail(mailOptions);
         console.log('Email sent successfully:', info.messageId);
+        console.log('=== EMAIL SENDING SUCCESS ===');
         return true;
     } catch (error) {
-        console.error('Error sending email:', error);
+        console.error('=== EMAIL SENDING FAILED ===');
+        console.error('Error details:', error);
+        console.error('Error message:', error.message);
+        console.error('Error code:', error.code);
         // We don't throw here to avoid failing the order if email fails
         return false;
     }

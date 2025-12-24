@@ -112,7 +112,16 @@ window.addEventListener("DOMContentLoaded", () => {
                     // Let's assume the user is logged in here or we iterate cleanup.
                     // For now, simple redirect.
 
-                    window.location.href = "thank-you.html";
+                    // Show processing message and wait 30 seconds
+                    const submitBtn = document.getElementById('submit-order-btn');
+                    const originalText = submitBtn.textContent;
+                    submitBtn.textContent = 'Processing order... Please wait 30 seconds';
+                    submitBtn.disabled = true;
+
+                    // Wait 30 seconds before redirecting
+                    setTimeout(() => {
+                        window.location.href = "thank-you.html";
+                    }, 30000);
                 } else {
                     alert('Failed to place order: ' + (result.error || 'Unknown error'));
                 }
