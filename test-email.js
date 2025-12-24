@@ -1,11 +1,11 @@
 require('dotenv').config();
 const { sendOrderEmail } = require('./backend/utils/email');
 
-// Test email with sample order data
+// Test email with REAL order data from checkout
 const testOrder = {
-    orderNumber: 'TEST-001',
-    date: new Date().toISOString(),
-    total: 99.99,
+    orderNumber: 'TEST-1766615639733',
+    date: '2025-12-24T22:33:59.733Z',
+    total: 49.99,
     customer: {
         fullName: 'Test Customer',
         email: 'test@example.com',
@@ -14,13 +14,17 @@ const testOrder = {
     shipping: {
         address: '123 Test Street',
         city: 'Test City',
-        governorate: 'Test Governorate'
+        governorate: 'Test Gov',
+        notes: 'Test order for email notification'
     },
     items: [
         {
-            name: 'Test Product',
+            productId: 3,
             quantity: 1,
-            price: 99.99
+            price: 49.99,
+            name: 'Red Shoes',
+            colorId: 5,
+            colorName: 'Red'
         }
     ]
 };
