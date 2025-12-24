@@ -114,9 +114,11 @@ window.addEventListener("DOMContentLoaded", () => {
 
                     // Show processing message and wait 30 seconds
                     const submitBtn = document.getElementById('submit-order-btn');
-                    const originalText = submitBtn.textContent;
-                    submitBtn.textContent = 'Processing order... Please wait 30 seconds';
-                    submitBtn.disabled = true;
+                    if (submitBtn) {
+                        const originalText = submitBtn.textContent;
+                        submitBtn.textContent = 'Processing order... Please wait 30 seconds';
+                        submitBtn.disabled = true;
+                    }
 
                     // Wait 30 seconds before redirecting
                     setTimeout(() => {
