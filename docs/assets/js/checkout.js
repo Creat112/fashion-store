@@ -6,8 +6,8 @@ let elements;
 let clientSecret;
 
 window.addEventListener("DOMContentLoaded", () => {
-    // Initialize Stripe
-    stripe = Stripe('pk_test_your_publishable_key_here'); // Replace with your actual key
+    // Initialize Stripe - DISABLED FOR NOW
+    // stripe = Stripe('pk_test_your_publishable_key_here'); // Replace with your actual key
     
     // We get items from localStorage passed from cart page
     let checkoutItems = [];
@@ -51,8 +51,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
     if (totalSpan) totalSpan.textContent = `$${total.toFixed(2)}`;
 
-    // Initialize Stripe payment
-    initializePayment(total);
+    // Initialize Stripe payment - DISABLED FOR NOW
+    // initializePayment(total);
 
     // Location handling (existing code)
     // ... (keep existing location code)
@@ -112,7 +112,9 @@ window.addEventListener("DOMContentLoaded", () => {
             };
 
             try {
-                // Process payment with Stripe first
+                // Process payment with Stripe - DISABLED FOR NOW
+                // Skip payment processing for now
+                /*
                 if (!stripe || !elements) {
                     alert('Payment system not ready. Please refresh the page.');
                     return;
@@ -142,8 +144,9 @@ window.addEventListener("DOMContentLoaded", () => {
                     showMessage(error.message);
                     return;
                 }
+                */
 
-                // If payment successful, submit order
+                // Direct order submission without payment
                 const result = await api.post('/orders', orderData);
 
                 if (result.success || result.orderId) {
