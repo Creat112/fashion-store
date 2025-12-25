@@ -163,17 +163,22 @@ async function loadProducts(category = null, sortBy = null, searchQuery = null) 
             }
 
             return `
-                <div class="product-card" onclick="window.location.href='product-detail.html?id=${product.id}'">
+                <div class="product-card">
                     <span class="stock-badge ${stockBadgeClass}">${stockBadgeText}</span>
-                    <img src="${product.image}" alt="${product.name}">
+                    <div class="product-image-container">
+                        <img src="${product.image}" alt="${product.name}" onclick="window.location.href='product-detail.html?id=${product.id}'">
+                        <button class="share-btn" onclick="shareProduct(${product.id}, '${product.name}')" title="Share product">
+                            <i class="ri-share-line"></i>
+                        </button>
+                    </div>
                     <div class="product-info">
                         ${product.category ? `<p class="category">${product.category}</p>` : ''}
-                        <h3>${product.name}</h3>
+                        <h3 onclick="window.location.href='product-detail.html?id=${product.id}'">${product.name}</h3>
                         
                         <div class="price-container">
                             ${hasDiscount ? `
                                 <span class="original-price">$${product.originalPrice.toFixed(2)}</span>
-                                <span class="price decreased">$${product.price.toFixed(2)}</span>
+                                <span class="price">$${product.price.toFixed(2)}</span>
                                 
                             ` : `
                                 <span class="price">$${product.price ? product.price.toFixed(2) : '0.00'}</span>
@@ -426,4 +431,55 @@ function initSliderControls() {
 
     // Start auto-scroll
     startAutoScroll();
+}
+
+// Share product function
+function shareProduct(productId, productName) {
+    event.stopPropagation();
+    
+    const productUrl = `${window.location.origin}/product-detail.html?id=${productId}`;
+    const shareText = `Check out this ${productName} from FASHION Store!`;
+    
+    // Check if Web Share API is available
+    if (navigator.share) {
+        navigator.share({
+            title: productName,
+            text: shareText,
+            url: productUrl
+        }).catch(err => console.log('Error sharing:', err));
+    } else {
+        // Fallback for desktop browsers
+        copyToClipboard(productUrl);
+    }
+}
+
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        showNotification('Link copied to clipboard!');
+    });
+}
+
+function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'share-notification';
+    notification.textContent = message;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #28a745;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        z-index: 10000;
+        font-size: 14px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        animation: slideIn 0.3s ease;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
 }

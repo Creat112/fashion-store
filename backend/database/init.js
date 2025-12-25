@@ -214,7 +214,7 @@ const seedProducts = () => {
                     discount: 31.68
                 },
                 { 
-                    name: 'Set', 
+                    name: 'Savax Winter Set', 
                     price: 1300, 
                     originalPrice: 1750,
                     description: 'Complete set with top and bottom', 

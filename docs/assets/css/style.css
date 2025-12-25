@@ -268,9 +268,17 @@ nav {
     text-decoration: none;
 }
 
-.product-card .decreased {
+.product-card .original-price {
     font-size: 1rem;
+    color: #f60606c4;
+    text-decoration: line-through;
+    margin-right: 0.5rem;
+}
+
+.product-card .decreased {
+    font-size: 1.1rem;
     color: #e74c3c;
+    font-weight: 700;
     text-decoration: line-through;
     opacity: 0.7;
 }
@@ -381,6 +389,73 @@ footer {
     font-size: 14px;
     margin-top: 10px;
     min-height: 20px;
+}
+
+/* Share Button Styles */
+.product-image-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.share-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.product-image-container:hover .share-btn {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.share-btn:hover {
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transform: scale(1.1);
+}
+
+.share-btn i {
+    font-size: 18px;
+    color: #333;
+}
+
+/* Animations */
+@keyframes slideIn {
+    from { 
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to { 
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .share-btn {
+        width: 35px;
+        height: 35px;
+        top: 8px;
+        right: 8px;
+    }
+    
+    .share-btn i {
+        font-size: 16px;
+    }
 }
 
 /* Product Slider Styles */
