@@ -81,6 +81,56 @@
     </footer>
 
     <script type="module" src="assets/js/product-detail.js"></script>
+    <script>
+        // Share function for global access
+        function shareProductDetail(productId, productName) {
+            const productUrl = `${window.location.origin}/product-detail.html?id=${productId}`;
+            const shareText = `Check out this ${productName} from FASHION Store!`;
+            
+            // Check if Web Share API is available
+            if (navigator.share) {
+                navigator.share({
+                    title: productName,
+                    text: shareText,
+                    url: productUrl
+                }).catch(err => console.log('Error sharing:', err));
+            } else {
+                // Fallback for desktop browsers
+                copyToClipboard(productUrl);
+            }
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('Link copied to clipboard!');
+            });
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'share-notification';
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #28a745;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                z-index: 10000;
+                font-size: 14px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                animation: slideIn 0.3s ease;
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+    </script>
 </body>
 
 </html>
