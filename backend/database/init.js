@@ -183,11 +183,46 @@ const seedProducts = () => {
         if (row.count === 0) {
             console.log("Seeding products...");
             const products = [
-                { name: 'Modern Black Watch', price: 29.99, description: 'A modern black watch', category: 'watches', image: 'assets/images/1.jpg', stock: 50, discount: 0, originalPrice: null },
-                { name: 'Blue Shoes', price: 47.99, description: 'Blue shoes', category: 'shoes', image: 'assets/images/2.jpg', stock: 30, discount: 20, originalPrice: 59.99 },
-                { name: 'Red Shoes', price: 49.99, description: 'Red shoes', category: 'shoes', image: 'assets/images/3.jpg', stock: 25, discount: 0, originalPrice: null },
-                { name: 'Black Shoes', price: 63.99, description: 'Black shoes', category: 'shoes', image: 'assets/images/4.jpg', stock: 40, discount: 20, originalPrice: 79.99 },
-                { name: 'Black T-Shirt', price: 31.99, description: 'Black T-Shirt', category: 't-shirts', image: 'assets/images/5.jpg', stock: 35, discount: 20, originalPrice: 39.99 }
+                { 
+                    name: 'Winter Compression', 
+                    price: 390, 
+                    originalPrice: 450,
+                    description: 'Comfortable winter compression wear', 
+                    category: 'compression', 
+                    image: 'products/Winter Compression/Black Compression.jpeg', 
+                    stock: 50, 
+                    discount: 13.33
+                },
+                { 
+                    name: 'Sweat Pants', 
+                    price: 580, 
+                    originalPrice: 690,
+                    description: 'Comfortable sweat pants for daily wear', 
+                    category: 'pants', 
+                    image: 'products/sweetpants/Sweet Pants Black.jpeg', 
+                    stock: 30, 
+                    discount: 15.94
+                },
+                { 
+                    name: 'Zipper Jacket', 
+                    price: 690, 
+                    originalPrice: 1010,
+                    description: 'Stylish zipper jacket with modern design', 
+                    category: 'jackets', 
+                    image: 'products/Ziper Jacket/Ziper Jacket Black.jpeg', 
+                    stock: 25, 
+                    discount: 31.68
+                },
+                { 
+                    name: 'Set', 
+                    price: 1300, 
+                    originalPrice: 1750,
+                    description: 'Complete set with top and bottom', 
+                    category: 'sets', 
+                    image: 'products/Set/Sets Savax Black.jpeg', 
+                    stock: 20, 
+                    discount: 25.71
+                }
             ];
 
             const stmt = db.prepare("INSERT INTO products (name, price, description, category, image, stock, discount, originalPrice) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
@@ -205,25 +240,33 @@ const seedProductColors = () => {
         if (row.count === 0) {
             console.log("Seeding product colors...");
             const colors = [
-                // Modern Black Watch (productId: 1)
-                { productId: 1, colorName: 'Black', colorCode: '#000000', price: 29.99, stock: 30, image: 'assets/images/1.jpg' },
-                { productId: 1, colorName: 'Silver', colorCode: '#C0C0C0', price: 34.99, stock: 20, image: 'assets/images/1.jpg' },
+                // Winter Compression (productId: 1)
+                { productId: 1, colorName: 'Black', colorCode: '#000000', price: 390, stock: 25, image: 'products/Winter Compression/Black Compression.jpeg' },
+                { productId: 1, colorName: 'White', colorCode: '#FFFFFF', price: 390, stock: 25, image: 'products/Winter Compression/White Compression.jpeg' },
 
-                // Blue Shoes (productId: 2) - with discount
-                { productId: 2, colorName: 'Blue', colorCode: '#0066CC', price: 47.99, stock: 15, image: 'assets/images/2.jpg' },
-                { productId: 2, colorName: 'Navy', colorCode: '#000080', price: 47.99, stock: 15, image: 'assets/images/2.jpg' },
+                // Sweat Pants (productId: 2)
+                { productId: 2, colorName: 'Black', colorCode: '#000000', price: 580, stock: 10, image: 'products/sweetpants/Sweet Pants Black.jpeg' },
+                { productId: 2, colorName: 'Brown', colorCode: '#8B4513', price: 580, stock: 10, image: 'products/sweetpants/Sweet Pants Brown.jpeg' },
+                { productId: 2, colorName: 'Grey', colorCode: '#808080', price: 580, stock: 10, image: 'products/sweetpants/Sweet Pants Grey.jpeg' },
+                { productId: 2, colorName: 'Olive Green', colorCode: '#808000', price: 580, stock: 10, image: 'products/sweetpants/Sweet Pants Olive Green.jpeg' },
+                { productId: 2, colorName: 'Pink', colorCode: '#FFC0CB', price: 580, stock: 10, image: 'products/sweetpants/Sweet Pants Pink.jpeg' },
+                { productId: 2, colorName: 'White', colorCode: '#FFFFFF', price: 580, stock: 10, image: 'products/sweetpants/Sweet Pants white.jpeg' },
 
-                // Red Shoes (productId: 3)
-                { productId: 3, colorName: 'Red', colorCode: '#FF0000', price: 49.99, stock: 25, image: 'assets/images/3.jpg' },
+                // Zipper Jacket (productId: 3)
+                { productId: 3, colorName: 'Black', colorCode: '#000000', price: 690, stock: 8, image: 'products/Ziper Jacket/Ziper Jacket Black.jpeg' },
+                { productId: 3, colorName: 'Olive Green', colorCode: '#808000', price: 690, stock: 8, image: 'products/Ziper Jacket/Ziper Jacket Olive Greenjpeg.jpeg' },
+                { productId: 3, colorName: 'Pink', colorCode: '#FFC0CB', price: 690, stock: 8, image: 'products/Ziper Jacket/Ziper Jacket Pink.jpeg' },
+                { productId: 3, colorName: 'White', colorCode: '#FFFFFF', price: 690, stock: 8, image: 'products/Ziper Jacket/Ziper Jacket White.jpeg' },
+                { productId: 3, colorName: 'Brown', colorCode: '#8B4513', price: 690, stock: 8, image: 'products/Ziper Jacket/Ziper Jacket brownjpeg.jpeg' },
+                { productId: 3, colorName: 'Grey', colorCode: '#808080', price: 690, stock: 8, image: 'products/Ziper Jacket/Ziper Jacket greyjpeg.jpeg' },
 
-                // Black Shoes (productId: 4) - with discount
-                { productId: 4, colorName: 'Black', colorCode: '#000000', price: 63.99, stock: 20, image: 'assets/images/4.jpg' },
-                { productId: 4, colorName: 'Brown', colorCode: '#8B4513', price: 63.99, stock: 20, image: 'assets/images/4.jpg' },
-
-                // Black T-Shirt (productId: 5) - with discount
-                { productId: 5, colorName: 'Black', colorCode: '#000000', price: 31.99, stock: 15, image: 'assets/images/5.jpg' },
-                { productId: 5, colorName: 'White', colorCode: '#FFFFFF', price: 31.99, stock: 10, image: 'assets/images/5.jpg' },
-                { productId: 5, colorName: 'Gray', colorCode: '#808080', price: 31.99, stock: 10, image: 'assets/images/5.jpg' }
+                // Set (productId: 4)
+                { productId: 4, colorName: 'Black', colorCode: '#000000', price: 1300, stock: 5, image: 'products/Set/Sets Savax Black.jpeg' },
+                { productId: 4, colorName: 'Brown', colorCode: '#8B4513', price: 1300, stock: 5, image: 'products/Set/Sets Savax Brown.jpeg' },
+                { productId: 4, colorName: 'Grey', colorCode: '#808080', price: 1300, stock: 5, image: 'products/Set/Sets Savax Grey.jpeg' },
+                { productId: 4, colorName: 'Olive Green', colorCode: '#808000', price: 1300, stock: 5, image: 'products/Set/Sets Savax Olive Green.jpeg' },
+                { productId: 4, colorName: 'Pink', colorCode: '#FFC0CB', price: 1300, stock: 5, image: 'products/Set/Sets Savax Pink.jpeg' },
+                { productId: 4, colorName: 'White', colorCode: '#FFFFFF', price: 1300, stock: 5, image: 'products/Set/Sets Savax White.jpeg' }
             ];
 
             const stmt = db.prepare("INSERT INTO product_colors (productId, colorName, colorCode, price, stock, image) VALUES (?, ?, ?, ?, ?, ?)");
