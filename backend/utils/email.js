@@ -4,28 +4,20 @@ const sendOrderEmail = async (orderData) => {
     try {
         console.log('=== EMAIL SENDING START ===');
         console.log('Email user:', process.env.EMAIL_USER);
-        console.log('Email pass exists:', !!process.env.EMAIL_PASS);
         console.log('Order data:', JSON.stringify(orderData, null, 2));
         
-        // Create a transporter
-        // NOTE: Try different service if Gmail fails
+        // Use Resend (modern email service, works on Railway)
         const transporter = nodemailer.createTransport({
-            service: 'gmail',
+            host: 'smtp.resend.com',
+            port: 587,
+            secure: false,
             auth: {
-                user: process.env.EMAIL_USER || 'placeholder@gmail.com',
-                pass: process.env.EMAIL_PASS || 'placeholder_password'
-            },
-            // Add these options for better reliability
-            tls: {
-                rejectUnauthorized: false
-            },
-            pool: true,
-            maxConnections: 1,
-            rateDelta: 20000,
-            rateLimit: 5
+                user: 'resend',
+                pass: process.env.RESEND_API_KEY || 're_your_api_key_here'
+            }
         });
 
-        console.log('Transporter created successfully');
+        console.log('Resend transporter created');
 
         const itemsHtml = orderData.items.map(item => `
             <tr>
