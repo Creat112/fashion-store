@@ -28,39 +28,49 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (productGrids.length > 0) {
             await loadProducts();
 
+            // Populate color filter dynamically
+            await populateColorFilter();
+
             // Filter/Sort listeners
             const categoryFilter = document.getElementById('category-filter');
+            const colorFilter = document.getElementById('color-filter');
             const sortBy = document.getElementById('sort-by');
             const searchInput = document.getElementById('search-input');
             const searchBtn = document.getElementById('search-btn');
 
             if (categoryFilter) {
                 categoryFilter.addEventListener('change', () => {
-                    loadProducts(categoryFilter.value, sortBy ? sortBy.value : null, searchInput ? searchInput.value : null);
+                    loadProducts(categoryFilter.value, colorFilter ? colorFilter.value : null, sortBy ? sortBy.value : null, searchInput ? searchInput.value : null);
+                });
+            }
+
+            if (colorFilter) {
+                colorFilter.addEventListener('change', () => {
+                    loadProducts(categoryFilter ? categoryFilter.value : null, colorFilter.value, sortBy ? sortBy.value : null, searchInput ? searchInput.value : null);
                 });
             }
 
             if (sortBy) {
                 sortBy.addEventListener('change', () => {
-                    loadProducts(categoryFilter ? categoryFilter.value : null, sortBy.value, searchInput ? searchInput.value : null);
+                    loadProducts(categoryFilter ? categoryFilter.value : null, colorFilter ? colorFilter.value : null, sortBy.value, searchInput ? searchInput.value : null);
                 });
             }
 
             if (searchInput) {
                 searchInput.addEventListener('input', () => {
-                    loadProducts(categoryFilter ? categoryFilter.value : null, sortBy ? sortBy.value : null, searchInput.value);
+                    loadProducts(categoryFilter ? categoryFilter.value : null, colorFilter ? colorFilter.value : null, sortBy ? sortBy.value : null, searchInput.value);
                 });
                 
                 searchInput.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') {
-                        loadProducts(categoryFilter ? categoryFilter.value : null, sortBy ? sortBy.value : null, searchInput.value);
+                        loadProducts(categoryFilter ? categoryFilter.value : null, colorFilter ? colorFilter.value : null, sortBy ? sortBy.value : null, searchInput.value);
                     }
                 });
             }
 
             if (searchBtn) {
                 searchBtn.addEventListener('click', () => {
-                    loadProducts(categoryFilter ? categoryFilter.value : null, sortBy ? sortBy.value : null, searchInput ? searchInput.value : null);
+                    loadProducts(categoryFilter ? categoryFilter.value : null, colorFilter ? colorFilter.value : null, sortBy ? sortBy.value : null, searchInput ? searchInput.value : null);
                 });
             }
         }
@@ -98,14 +108,50 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
 
-        // Filter/Sort listeners... (Removed for brevity, but can be re-added if needed)
-
     } catch (error) {
         console.error('Error initializing app:', error);
     }
 });
 
-async function loadProducts(category = null, sortBy = null, searchQuery = null) {
+// Populate color filter with available colors from products
+async function populateColorFilter() {
+    try {
+        const products = await getProducts(); // Get all products
+        const colorSet = new Set(); // Use Set to avoid duplicates
+        
+        // Collect all unique colors from all products
+        products.forEach(product => {
+            if (product.colors && product.colors.length > 0) {
+                product.colors.forEach(color => {
+                    if (color.colorName) {
+                        colorSet.add(color.colorName.trim());
+                    }
+                });
+            }
+        });
+        
+        // Get the color filter select element
+        const colorFilter = document.getElementById('color-filter');
+        if (!colorFilter) return;
+        
+        // Clear existing options except "All Colors"
+        colorFilter.innerHTML = '<option value="">All Colors</option>';
+        
+        // Sort colors alphabetically and add them to the filter
+        const sortedColors = Array.from(colorSet).sort();
+        sortedColors.forEach(color => {
+            const option = document.createElement('option');
+            option.value = color.toLowerCase();
+            option.textContent = color;
+            colorFilter.appendChild(option);
+        });
+        
+    } catch (error) {
+        console.error('Error populating color filter:', error);
+    }
+}
+
+async function loadProducts(category = null, color = null, sortBy = null, searchQuery = null) {
     try {
         const products = await getProducts(category);
         const containers = document.querySelectorAll('.products-grid');
@@ -121,6 +167,20 @@ async function loadProducts(category = null, sortBy = null, searchQuery = null) 
                 const categoryMatch = product.category && product.category.toLowerCase().includes(query);
                 const descriptionMatch = product.description && product.description.toLowerCase().includes(query);
                 return nameMatch || categoryMatch || descriptionMatch;
+            });
+        }
+
+        // Filter products by color
+        if (color && color.trim() !== '') {
+            const colorQuery = color.toLowerCase().trim();
+            filteredProducts = filteredProducts.filter(product => {
+                if (!product.colors || product.colors.length === 0) return false;
+                
+                // Check if any color matches the filter
+                return product.colors.some(productColor => {
+                    const colorName = productColor.colorName ? productColor.colorName.toLowerCase() : '';
+                    return colorName.includes(colorQuery);
+                });
             });
         }
 

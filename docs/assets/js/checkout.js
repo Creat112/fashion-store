@@ -38,7 +38,29 @@ window.addEventListener("DOMContentLoaded", () => {
             li.style.alignItems = "center";
             li.style.justifyContent = "space-between";
             li.style.marginBottom = "10px";
+            li.style.padding = "10px";
+            li.style.border = "1px solid #ddd";
+            li.style.borderRadius = "8px";
+            
+            // Create item details
+            const itemDetails = document.createElement("div");
+            itemDetails.style.flex = "1";
+            itemDetails.innerHTML = `
+                <div style="font-weight: 600; color: #333;">${item.name}</div>
+                ${item.colorName ? `<div style="font-size: 0.9rem; color: #666;">Color: ${item.colorName}</div>` : ''}
+                <div style="font-size: 0.9rem; color: #666;">Qty: ${item.quantity}</div>
+            `;
+            
+            // Create price
+            const itemPrice = document.createElement("div");
+            itemPrice.style.fontWeight = "600";
+            itemPrice.style.color = "#27ae60";
+            itemPrice.textContent = `$${(item.price * item.quantity).toFixed(2)}`;
+            
+            li.appendChild(itemDetails);
+            li.appendChild(itemPrice);
             listContainer.appendChild(li);
+            
             total += item.price * item.quantity;
         });
     }
