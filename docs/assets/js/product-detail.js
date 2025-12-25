@@ -140,6 +140,9 @@ function renderProductDetail(product) {
                     <button class="btn btn-primary add-to-cart-btn" id="add-to-cart-btn" ${displayStock === 0 ? 'disabled' : ''}>
                         <i class="ri-shopping-cart-line"></i> Add to Cart
                     </button>
+                    <button class="btn btn-outline" onclick="shareProductDetail(${product.id}, '${product.name}')">
+                        <i class="ri-share-line"></i> Share
+                    </button>
                     <button class="btn btn-outline" onclick="window.location.href='products.html'">
                         <i class="ri-arrow-left-line"></i> Continue Shopping
                     </button>
@@ -314,4 +317,53 @@ function showError(message) {
             <a href="products.html" class="btn">Back to Products</a>
         </div>
     `;
+}
+
+// Share product function for detail page
+function shareProductDetail(productId, productName) {
+    const productUrl = `${window.location.origin}/product-detail.html?id=${productId}`;
+    const shareText = `Check out this ${productName} from FASHION Store!`;
+    
+    // Check if Web Share API is available
+    if (navigator.share) {
+        navigator.share({
+            title: productName,
+            text: shareText,
+            url: productUrl
+        }).catch(err => console.log('Error sharing:', err));
+    } else {
+        // Fallback for desktop browsers
+        copyToClipboard(productUrl);
+    }
+}
+
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        showNotification('Link copied to clipboard!');
+    });
+}
+
+function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'share-notification';
+    notification.textContent = message;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #28a745;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        z-index: 10000;
+        font-size: 14px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        animation: slideIn 0.3s ease;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
 }
