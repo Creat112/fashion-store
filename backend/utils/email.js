@@ -7,8 +7,8 @@ const sendOrderEmail = async (orderData) => {
         console.log('Order data:', JSON.stringify(orderData, null, 2));
         
         // Use Resend API directly (easier than SMTP)
-        const resend = require('resend');
-        const resendClient = new resend(process.env.RESEND_API_KEY);
+        const { Resend } = require('resend');
+        const resendClient = new Resend(process.env.RESEND_API_KEY);
 
         console.log('Resend client created');
 
