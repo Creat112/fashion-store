@@ -1,8 +1,14 @@
 import { api } from './api.js';
 
 let selectedLocation = null;
+let stripe;
+let elements;
+let clientSecret;
 
 window.addEventListener("DOMContentLoaded", () => {
+    // Initialize Stripe
+    stripe = Stripe('pk_test_your_publishable_key_here'); // Replace with your actual key
+    
     // We get items from localStorage passed from cart page
     const checkoutItems = JSON.parse(localStorage.getItem("checkoutItems")) || [];
     const listContainer = document.getElementById("checkout-list");
@@ -25,24 +31,18 @@ window.addEventListener("DOMContentLoaded", () => {
             li.style.alignItems = "center";
             li.style.justifyContent = "space-between";
             li.style.marginBottom = "10px";
-
-            li.innerHTML = `
-                <div style="display:flex; align-items:center; gap:10px">
-                    <img src="${item.colorImage || item.image}" width="50" style="object-fit:cover; height:50px; border-radius:4px" />
-                    <div>
-                        <span>${item.name} × ${item.quantity}</span>
-                        ${item.colorName ? `<br><small style="color:#666">Color: ${item.colorName}</small>` : ''}
-                    </div>
-                </div>
-                <b>$${(item.price * item.quantity).toFixed(2)}</b>
-            `;
-
             listContainer.appendChild(li);
             total += item.price * item.quantity;
         });
     }
 
     if (totalSpan) totalSpan.textContent = `$${total.toFixed(2)}`;
+
+    // Initialize Stripe payment
+    initializePayment(total);
+
+    // Location handling (existing code)
+    // ... (keep existing location code)
 
     // Map Setup
     if (document.getElementById('map')) {
@@ -99,28 +99,51 @@ window.addEventListener("DOMContentLoaded", () => {
             };
 
             try {
-                // Submit to API
+                // Process payment with Stripe first
+                if (!stripe || !elements) {
+                    alert('Payment system not ready. Please refresh the page.');
+                    return;
+                }
+
+                const { error } = await stripe.confirmPayment({
+                    elements,
+                    confirmParams: {
+                        return_url: `${window.location.origin}/thank-you.html`,
+                        payment_method_data: {
+                            billing_details: {
+                                name: customer.fullName,
+                                email: customer.email,
+                                phone: customer.phone,
+                                address: {
+                                    line1: shipping.address,
+                                    city: shipping.city,
+                                    state: shipping.governorate,
+                                    country: 'EG'
+                                }
+                            }
+                        }
+                    },
+                });
+
+                if (error) {
+                    showMessage(error.message);
+                    return;
+                }
+
+                // If payment successful, submit order
                 const result = await api.post('/orders', orderData);
 
                 if (result.success || result.orderId) {
                     sessionStorage.setItem("currentOrder", JSON.stringify(orderData));
                     localStorage.removeItem("checkoutItems");
 
-                    // Clear cart from server if user is logged in
-                    // In a real app the server would do this automatically upon order creation
-                    // but since we are using a separate cart API call...
-                    // Let's assume the user is logged in here or we iterate cleanup.
-                    // For now, simple redirect.
-
-                    // Show processing message and wait 30 seconds
+                    // Wait 30 seconds before redirecting
                     const submitBtn = document.getElementById('submit-order-btn');
                     if (submitBtn) {
-                        const originalText = submitBtn.textContent;
                         submitBtn.textContent = 'Processing order... Please wait 30 seconds';
                         submitBtn.disabled = true;
                     }
 
-                    // Wait 30 seconds before redirecting
                     setTimeout(() => {
                         window.location.href = "thank-you.html";
                     }, 30000);
@@ -134,3 +157,74 @@ window.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
+
+// Stripe Payment Functions
+async function initializePayment(amount) {
+    try {
+        // Create payment intent
+        const response = await api.post('/payment/create-payment-intent', {
+            amount: amount,
+            currency: 'usd'
+        });
+        
+        clientSecret = response.clientSecret;
+        
+        // Create and mount Stripe Elements
+        const appearance = { theme: 'stripe' };
+        elements = stripe.elements({ appearance, clientSecret });
+        
+        const paymentElement = elements.create('payment-element');
+        paymentElement.mount('#payment-element');
+        
+    } catch (error) {
+        console.error('Payment initialization failed:', error);
+        showMessage('Payment initialization failed. Please refresh the page.');
+    }
+}
+
+async function handleSubmit(e) {
+    e.preventDefault();
+    setLoading(true);
+
+    if (!stripe || !elements) {
+        return;
+    }
+
+    const { error } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+            return_url: `${window.location.origin}/thank-you.html`,
+        },
+    });
+
+    if (error.type === "card_error" || error.type === "validation_error") {
+        showMessage(error.message);
+    } else {
+        showMessage("An unexpected error occurred.");
+    }
+
+    setLoading(false);
+}
+
+function showMessage(messageText) {
+    const messageContainer = document.getElementById("payment-message");
+    if (messageContainer) {
+        messageContainer.textContent = messageText;
+        setTimeout(() => {
+            messageContainer.textContent = "";
+        }, 4000);
+    }
+}
+
+function setLoading(isLoading) {
+    const submitBtn = document.getElementById('submit-order-btn');
+    if (submitBtn) {
+        if (isLoading) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Processing...";
+        } else {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Place Order";
+        }
+    }
+}
