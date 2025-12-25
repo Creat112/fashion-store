@@ -31,7 +31,7 @@ const sendOrderEmail = async (orderData) => {
 
         const mailOptions = {
             from: '"Fashion Store" <' + (process.env.EMAIL_USER || 'placeholder@gmail.com') + '>',
-            to: 'sasaabdelhady333@gmail.com',
+            to: 'sasaabdelhady38@gmail.com',
             subject: `New Order Received: ${orderData.orderNumber}`,
             html: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">

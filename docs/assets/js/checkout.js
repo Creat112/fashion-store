@@ -1,14 +1,8 @@
 import { api } from './api.js';
 
 let selectedLocation = null;
-let stripe;
-let elements;
-let clientSecret;
 
 window.addEventListener("DOMContentLoaded", () => {
-    // Initialize Stripe - DISABLED FOR NOW
-    // stripe = Stripe('pk_test_your_publishable_key_here'); // Replace with your actual key
-    
     // We get items from localStorage passed from cart page
     let checkoutItems = [];
     try {
@@ -50,9 +44,6 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     if (totalSpan) totalSpan.textContent = `$${total.toFixed(2)}`;
-
-    // Initialize Stripe payment - DISABLED FOR NOW
-    // initializePayment(total);
 
     // Location handling (existing code)
     // ... (keep existing location code)
@@ -112,57 +103,15 @@ window.addEventListener("DOMContentLoaded", () => {
             };
 
             try {
-                // Process payment with Stripe - DISABLED FOR NOW
-                // Skip payment processing for now
-                /*
-                if (!stripe || !elements) {
-                    alert('Payment system not ready. Please refresh the page.');
-                    return;
-                }
-
-                const { error } = await stripe.confirmPayment({
-                    elements,
-                    confirmParams: {
-                        return_url: `${window.location.origin}/thank-you.html`,
-                        payment_method_data: {
-                            billing_details: {
-                                name: customer.fullName,
-                                email: customer.email,
-                                phone: customer.phone,
-                                address: {
-                                    line1: shipping.address,
-                                    city: shipping.city,
-                                    state: shipping.governorate,
-                                    country: 'EG'
-                                }
-                            }
-                        }
-                    },
-                });
-
-                if (error) {
-                    showMessage(error.message);
-                    return;
-                }
-                */
-
-                // Direct order submission without payment
+                // Direct order submission
                 const result = await api.post('/orders', orderData);
 
                 if (result.success || result.orderId) {
                     sessionStorage.setItem("currentOrder", JSON.stringify(orderData));
                     localStorage.removeItem("checkoutItems");
 
-                    // Wait 30 seconds before redirecting
-                    const submitBtn = document.getElementById('submit-order-btn');
-                    if (submitBtn) {
-                        submitBtn.textContent = 'Processing order... Please wait 30 seconds';
-                        submitBtn.disabled = true;
-                    }
-
-                    setTimeout(() => {
-                        window.location.href = "thank-you.html";
-                    }, 30000);
+                    // Direct redirect without waiting
+                    window.location.href = "thank-you.html";
                 } else {
                     alert('Failed to place order: ' + (result.error || 'Unknown error'));
                 }
@@ -173,97 +122,3 @@ window.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
-
-// Stripe Payment Functions
-async function initializePayment(amount) {
-    try {
-        console.log('Initializing payment for amount:', amount);
-        
-        // Check if Stripe is properly initialized
-        if (!stripe) {
-            throw new Error('Stripe not initialized. Check your publishable key.');
-        }
-        
-        // Create payment intent
-        const response = await api.post('/payment/create-payment-intent', {
-            amount: amount,
-            currency: 'usd'
-        });
-        
-        console.log('Payment intent response:', response);
-        
-        if (!response.clientSecret) {
-            throw new Error('No client secret received from server');
-        }
-        
-        clientSecret = response.clientSecret;
-        
-        // Create and mount Stripe Elements
-        const appearance = { theme: 'stripe' };
-        elements = stripe.elements({ appearance, clientSecret });
-        
-        const paymentElement = elements.create('payment-element');
-        paymentElement.mount('#payment-element');
-        
-        console.log('Payment element mounted successfully');
-        
-    } catch (error) {
-        console.error('Payment initialization failed:', error);
-        
-        // More specific error messages
-        if (error.message.includes('404')) {
-            showMessage('Payment endpoint not found. Server may need restart.');
-        } else if (error.message.includes('<!DOCTYPE')) {
-            showMessage('Server returned HTML instead of JSON. Check server configuration.');
-        } else {
-            showMessage('Payment initialization failed: ' + error.message);
-        }
-    }
-}
-
-async function handleSubmit(e) {
-    e.preventDefault();
-    setLoading(true);
-
-    if (!stripe || !elements) {
-        return;
-    }
-
-    const { error } = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-            return_url: `${window.location.origin}/thank-you.html`,
-        },
-    });
-
-    if (error.type === "card_error" || error.type === "validation_error") {
-        showMessage(error.message);
-    } else {
-        showMessage("An unexpected error occurred.");
-    }
-
-    setLoading(false);
-}
-
-function showMessage(messageText) {
-    const messageContainer = document.getElementById("payment-message");
-    if (messageContainer) {
-        messageContainer.textContent = messageText;
-        setTimeout(() => {
-            messageContainer.textContent = "";
-        }, 4000);
-    }
-}
-
-function setLoading(isLoading) {
-    const submitBtn = document.getElementById('submit-order-btn');
-    if (submitBtn) {
-        if (isLoading) {
-            submitBtn.disabled = true;
-            submitBtn.textContent = "Processing...";
-        } else {
-            submitBtn.disabled = false;
-            submitBtn.textContent = "Place Order";
-        }
-    }
-}
