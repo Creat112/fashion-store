@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - FASHION</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/cart.css">
+</head>
+<body>
+    <nav>
+        <div class="container nav-container">
+            <a href="index.html" class="logo">FASHION</a>
+            <button class="mobile-menu-btn" id="menu-btn">
+    <i class="ri-menu-line"></i>
+</button>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="products.html">Shop</a></li>
+                <li><a href="login.html">Login</a></li>
+                <li>
+                    <a href="cart.html" class="cart-link">
+                        <i class="ri-shopping-cart-line"></i>
+                        <span class="cart-count">0</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="cart-container">
+        <h1 class="cart-header">Your Shopping Cart</h1>
+        
+        <div class="cart-items" id="cart-items">
+            <!-- Cart items will be dynamically inserted here -->
+            <div class="empty-cart">
+                <i class="ri-shopping-cart-line"></i>
+                <p>Your cart is empty</p>
+                <a href="products.html" class="btn">Continue Shopping</a>
+            </div>
+        </div>
+        
+        <div class="cart-summary">
+            <h2>Order Summary</h2>
+            <div class="summary-row">
+                <span>Subtotal</span>
+                <span id="subtotal">$0.00</span>
+            </div>
+            <div class="summary-row">
+                <span>Shipping</span>
+                <span>Free</span>
+            </div>
+            <div class="summary-row summary-total">
+                <span>Total</span>
+                <span id="total">$0.00</span>
+            </div>
+            <button class="checkout-btn" id="proceed-to-checkout" onclick="">Proceed to Checkout</button>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>FASHION</h3>
+                    <p>Your one-stop shop for the latest FASHION trends and styles.</p>
+                </div>
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="products.html">Shop</a></li>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Customer Service</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Shipping Policy</a></li>
+                        <li><a href="#">Returns & Exchanges</a></li>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Size Guide</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 FASHION. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // This will be replaced with dynamic cart functionality
+        function updateCart() {
+            // Will be implemented in the main JavaScript
+        }
+        
+        // Initialize cart
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCart();
+        });
+    </script>
+    <script type="module" src="assets/js/app.js"></script>
+   
+<script type="module" src="assets/js/cart.js"></script>
+</body>
+</html>
