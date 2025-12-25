@@ -4,6 +4,7 @@ const sendOrderEmail = async (orderData) => {
     try {
         console.log('=== EMAIL SENDING START ===');
         console.log('Email user:', process.env.EMAIL_USER);
+        console.log('Email pass exists:', !!process.env.EMAIL_PASS);
         console.log('Order data:', JSON.stringify(orderData, null, 2));
         
         // Create a transporter
@@ -15,6 +16,8 @@ const sendOrderEmail = async (orderData) => {
                 pass: process.env.EMAIL_PASS || 'placeholder_password'
             }
         });
+
+        console.log('Transporter created successfully');
 
         const itemsHtml = orderData.items.map(item => `
             <tr>
