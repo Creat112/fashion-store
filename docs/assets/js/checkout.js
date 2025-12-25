@@ -10,7 +10,20 @@ window.addEventListener("DOMContentLoaded", () => {
     stripe = Stripe('pk_test_your_publishable_key_here'); // Replace with your actual key
     
     // We get items from localStorage passed from cart page
-    const checkoutItems = JSON.parse(localStorage.getItem("checkoutItems")) || [];
+    let checkoutItems = [];
+    try {
+        checkoutItems = JSON.parse(localStorage.getItem("checkoutItems")) || [];
+    } catch (error) {
+        console.error('localStorage access blocked:', error);
+        // Fallback: try sessionStorage or show message
+        try {
+            checkoutItems = JSON.parse(sessionStorage.getItem("checkoutItems")) || [];
+        } catch (sessionError) {
+            console.error('sessionStorage also blocked:', sessionError);
+            alert('Your browser is blocking local storage. Please enable storage access or use a different browser to complete your purchase.');
+            return;
+        }
+    }
     const listContainer = document.getElementById("checkout-list");
     const totalSpan = document.getElementById("order-total");
     const checkoutForm = document.getElementById("checkoutForm");
@@ -161,11 +174,24 @@ window.addEventListener("DOMContentLoaded", () => {
 // Stripe Payment Functions
 async function initializePayment(amount) {
     try {
+        console.log('Initializing payment for amount:', amount);
+        
+        // Check if Stripe is properly initialized
+        if (!stripe) {
+            throw new Error('Stripe not initialized. Check your publishable key.');
+        }
+        
         // Create payment intent
         const response = await api.post('/payment/create-payment-intent', {
             amount: amount,
             currency: 'usd'
         });
+        
+        console.log('Payment intent response:', response);
+        
+        if (!response.clientSecret) {
+            throw new Error('No client secret received from server');
+        }
         
         clientSecret = response.clientSecret;
         
@@ -176,9 +202,19 @@ async function initializePayment(amount) {
         const paymentElement = elements.create('payment-element');
         paymentElement.mount('#payment-element');
         
+        console.log('Payment element mounted successfully');
+        
     } catch (error) {
         console.error('Payment initialization failed:', error);
-        showMessage('Payment initialization failed. Please refresh the page.');
+        
+        // More specific error messages
+        if (error.message.includes('404')) {
+            showMessage('Payment endpoint not found. Server may need restart.');
+        } else if (error.message.includes('<!DOCTYPE')) {
+            showMessage('Server returned HTML instead of JSON. Check server configuration.');
+        } else {
+            showMessage('Payment initialization failed: ' + error.message);
+        }
     }
 }
 
