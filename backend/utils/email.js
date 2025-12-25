@@ -8,13 +8,21 @@ const sendOrderEmail = async (orderData) => {
         console.log('Order data:', JSON.stringify(orderData, null, 2));
         
         // Create a transporter
-        // NOTE: For production, use environment variables!
+        // NOTE: Try different service if Gmail fails
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
                 user: process.env.EMAIL_USER || 'placeholder@gmail.com',
                 pass: process.env.EMAIL_PASS || 'placeholder_password'
-            }
+            },
+            // Add these options for better reliability
+            tls: {
+                rejectUnauthorized: false
+            },
+            pool: true,
+            maxConnections: 1,
+            rateDelta: 20000,
+            rateLimit: 5
         });
 
         console.log('Transporter created successfully');
@@ -91,6 +99,7 @@ const sendOrderEmail = async (orderData) => {
 
         const info = await transporter.sendMail(mailOptions);
         console.log('Email sent successfully:', info.messageId);
+        console.log('Email response:', info);
         console.log('=== EMAIL SENDING SUCCESS ===');
         return true;
     } catch (error) {
