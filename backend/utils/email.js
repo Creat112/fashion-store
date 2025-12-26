@@ -79,6 +79,39 @@ const sendEmail = async ({ to, subject, html, preferSmtp = false }) => {
     }
 };
 
+const sendCustomerOrderEmailWithTracking = async (orderData) => {
+    try {
+        const { Resend } = require('resend');
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        const clientEmail = orderData.customer.email;
+        const trackingLink = `https://yourdomain.com/track-order.html?order=${orderData.orderNumber}`;
+
+        const { data, error } = await resend.emails.send({
+            from: "Store <onboarding@resend.dev>",
+            to: clientEmail,
+            subject: `Order Confirmation: ${orderData.orderNumber}`,
+            html: `
+              <h2>Thank you for your order!</h2>
+              <p>Your order is being processed.</p>
+              <p><strong>Order ID:</strong> ${orderData.orderNumber}</p>
+              <p><strong>Track your order:</strong> <a href="${trackingLink}">${trackingLink}</a></p>
+              <p>Order details: ${JSON.stringify(orderData)}</p>
+            `
+        });
+
+        if (error) {
+            console.error('Email sending failed:', error);
+            return false;
+        }
+
+        console.log('Customer email sent:', data);
+        return true;
+    } catch (error) {
+        console.error('Failed to send customer email:', error);
+        return false;
+    }
+};
+
 const buildOrderEmailHtml = (orderData, headingText) => {
     const itemsHtml = orderData.items.map(item => `
             <tr>
@@ -226,4 +259,4 @@ const sendOrderStatusUpdateEmail = async (orderData, newStatus, trackingNumber =
     }
 };
 
-module.exports = { sendOrderEmail, sendCustomerOrderEmail, sendOrderStatusUpdateEmail };
+module.exports = { sendOrderEmail, sendCustomerOrderEmail, sendOrderStatusUpdateEmail, sendCustomerOrderEmailWithTracking };
