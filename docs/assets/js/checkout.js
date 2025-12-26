@@ -55,7 +55,7 @@ window.addEventListener("DOMContentLoaded", () => {
             const itemPrice = document.createElement("div");
             itemPrice.style.fontWeight = "600";
             itemPrice.style.color = "#27ae60";
-            itemPrice.textContent = `$${(item.price * item.quantity).toFixed(2)}`;
+            itemPrice.textContent = `${(item.price * item.quantity).toFixed(2)}EGP`;
             
             li.appendChild(itemDetails);
             li.appendChild(itemPrice);

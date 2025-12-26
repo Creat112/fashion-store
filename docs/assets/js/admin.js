@@ -443,7 +443,7 @@ async function renderProducts() {
                     <img class="p-thumb" src="${p.image || 'assets/images/placeholder.jpg'}" alt="">
                     <div>
                         <div><strong>${p.name}</strong></div>
-                        <div class="small-muted">${p.category || ''} • $${Number(p.price).toFixed(2)} • stock: ${p.stock ?? 0}</div>
+                        <div class="small-muted">${p.category || ''} • ${Number(p.price).toFixed(2)} EGP • stock: ${p.stock ?? 0}</div>
                     </div>
                 </div>
                 <div class="actions">

@@ -187,8 +187,8 @@ async function loadProducts(category = null, color = null, sortBy = null, search
         // Sort products client-side
         if (sortBy) {
             filteredProducts.sort((a, b) => {
-                if (sortBy === 'price-asc') return a.price - b.price;
-                if (sortBy === 'price-desc') return b.price - a.price;
+                if (sortBy === 'price-asc') return a - b.price;
+                if (sortBy === 'price-desc') return b.price - a;
                 if (sortBy === 'name-asc') return a.name.localeCompare(b.name);
                 if (sortBy === 'name-desc') return b.name.localeCompare(a.name);
                 return 0;
@@ -238,10 +238,10 @@ async function loadProducts(category = null, color = null, sortBy = null, search
                         <div class="price-container">
                             ${hasDiscount ? `
                                 <span class="original-price">$${product.originalPrice.toFixed(2)}</span>
-                                <span class="price">$${product.price.toFixed(2)}</span>
+                                <span class="price">${product.price.toFixed(2)}EGP</span>
                                 
                             ` : `
-                                <span class="price">$${product.price ? product.price.toFixed(2) : '0.00'}</span>
+                                <span class="price">${product.price ? product.price.toFixed(2) : '0.00'}EGP</span>
                             `}
                         </div>
 
@@ -306,7 +306,7 @@ async function renderCartPage() {
                 <div class="cart-item-details" style="flex: 1;">
                     <h3>${item.name}</h3>
                     ${colorDisplay}
-                    <p class="price">$${item.price.toFixed(2)}</p>
+                    <p class="price">${item.price.toFixed(2)}EGP</p>
                     <div class="quantity-controls" style="margin: 0.5rem 0;">
                         <input type="number" class="qty-input" min="1" value="${item.quantity}" style="width: 50px;" />
                     </div>

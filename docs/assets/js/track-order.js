@@ -237,7 +237,7 @@ class OrderTracker {
                         <div class="order-item-details">
                             <div class="order-item-name">${item.name}</div>
                             <div class="order-item-variant">${item.colorName ? `Color: ${item.colorName}` : ''} | Quantity: ${item.quantity}</div>
-                            <div class="order-item-price">EGP ${item.price.toFixed(2)} each</div>
+                            <div class="order-item-price"> ${item.price.toFixed(2)} EGP each</div>
                         </div>
                     </div>
                 `).join('')}

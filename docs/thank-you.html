@@ -97,7 +97,7 @@
                         <img src="${item.image || 'assets/images/placeholder.jpg'}" alt="${item.name}" />
                         <span>${item.name} × ${item.quantity}</span>
                     </div>
-                    <b>$${(item.price * item.quantity).toFixed(2)}</b>
+                    <b>${(item.price * item.quantity).toFixed(2)} EGP</b>
                 `;
                 orderSummaryContainer.appendChild(div);
             });
