@@ -12,6 +12,12 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(bodyParser.json());
 
+// Add request logging middleware
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.url}`);
+    next();
+});
+
 // Database initialization
 initDB();
 
@@ -21,11 +27,15 @@ const productRoutes = require('./routes/products');
 const cartRoutes = require('./routes/cart');
 const paymentRoutes = require('./routes/payment');
 
+console.log('Registering API routes...');
+
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/payment', paymentRoutes);
+
+console.log('API routes registered');
 
 // Static files (serve after API routes)
 app.use(express.static(path.join(__dirname, '../docs'))); // Serve static files from docs folder

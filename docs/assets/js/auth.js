@@ -82,33 +82,14 @@ const handleSignup = async (e) => {
 };
 
 const updateAuthUI = (user) => {
-    const loginLink = document.getElementById('login-link');
-    const myOrdersLink = document.getElementById('my-orders-link');
-    
-    if (user) {
-        // Show user info and My Orders link
-        if (loginLink) {
-            loginLink.textContent = `Hi, ${user.name}`;
-            loginLink.href = '#';
-            loginLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                if (confirm('Logout?')) logout();
-            });
-        }
-        
-        if (myOrdersLink) {
-            myOrdersLink.style.display = 'block';
-        }
-    } else {
-        // Show login link and hide My Orders
-        if (loginLink) {
-            loginLink.textContent = 'Login';
-            loginLink.href = 'login.html';
-        }
-        
-        if (myOrdersLink) {
-            myOrdersLink.style.display = 'none';
-        }
+    const loginLink = document.querySelector('a[href="login.html"]');
+    if (user && loginLink) {
+        loginLink.textContent = `Hi, ${user.name}`;
+        loginLink.href = '#';
+        loginLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (confirm('Logout?')) logout();
+        });
     }
 };
 

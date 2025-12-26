@@ -5,12 +5,17 @@ class OrderTracker {
         this.orderResult = document.getElementById('order-result');
         this.loading = document.getElementById('loading');
         this.errorMessage = document.getElementById('error-message');
+        this.userOrdersSection = document.getElementById('user-orders-section');
+        this.userOrdersList = document.getElementById('user-orders-list');
         
         this.init();
     }
 
     init() {
         this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+        
+        // Load user orders if logged in
+        this.loadUserOrders();
         
         // Sample order data for demonstration
         this.sampleOrders = {
@@ -394,11 +399,80 @@ class OrderTracker {
     hideError() {
         this.errorMessage.style.display = 'none';
     }
+
+    // Load user orders if logged in
+    async loadUserOrders() {
+        try {
+            const userData = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
+            
+            if (!userData) {
+                console.log('No user data found - user not logged in');
+                return; // User not logged in
+            }
+
+            const user = JSON.parse(userData);
+            console.log('Loading orders for user:', user.email);
+            
+            const response = await fetch(`/api/orders/user?email=${encodeURIComponent(user.email)}`);
+
+            if (!response.ok) {
+                console.error('Failed to load orders:', response.status);
+                if (response.status === 404) {
+                    console.error('API endpoint not found - server may need restart');
+                }
+                return; // Error loading orders
+            }
+
+            const orders = await response.json();
+            console.log('User orders loaded:', orders);
+            
+            if (orders && orders.length > 0) {
+                this.renderUserOrders(orders);
+            } else {
+                console.log('No orders found for user');
+            }
+            
+        } catch (error) {
+            console.error('Error loading user orders:', error);
+        }
+    }
+
+    // Render user orders list
+    renderUserOrders(orders) {
+        if (!this.userOrdersList || !this.userOrdersSection) return;
+
+        this.userOrdersList.innerHTML = orders.map(order => {
+            const statusClass = `status-${order.status}`;
+            const formattedDate = new Date(order.date).toLocaleDateString();
+
+            return `
+                <div class="user-order-item" onclick="orderTracker.trackOrder('${order.orderNumber}')">
+                    <div class="user-order-info">
+                        <div class="user-order-number">${order.orderNumber}</div>
+                        <div class="user-order-date">${formattedDate}</div>
+                    </div>
+                    <div class="user-order-status ${statusClass}">${order.status}</div>
+                </div>
+            `;
+        }).join('');
+
+        this.userOrdersSection.style.display = 'block';
+    }
+
+    // Track order by order number
+    trackOrder(orderNumber) {
+        const orderIdInput = document.getElementById('order-id');
+        if (orderIdInput) {
+            orderIdInput.value = orderNumber;
+            this.form.dispatchEvent(new Event('submit'));
+        }
+    }
 }
 
 // Initialize when DOM is loaded
+let orderTracker;
 document.addEventListener('DOMContentLoaded', () => {
-    new OrderTracker();
+    orderTracker = new OrderTracker();
 });
 
 // Mobile menu functionality (reuse from main app)
