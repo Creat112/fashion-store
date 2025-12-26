@@ -1,5 +1,5 @@
 const nodemailer = require('nodemailer');
-
+console.log('CUSTOMER_RESEND_API:', process.env.CUSTOMER_RESEND_API)
 const sendEmail = async ({ to, subject, html, preferSmtp = false }) => {
     try {
         const user = process.env.EMAIL_USER;
