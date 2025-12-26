@@ -1,5 +1,84 @@
 const nodemailer = require('nodemailer');
 
+const sendEmail = async ({ to, subject, html, preferSmtp = false }) => {
+    try {
+        const user = process.env.EMAIL_USER;
+        const pass = process.env.EMAIL_PASS;
+
+        const toList = Array.isArray(to) ? to : [to];
+
+        if (preferSmtp && user && pass) {
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user,
+                    pass
+                }
+            });
+
+            const fromAddress = process.env.EMAIL_FROM || user;
+            const info = await transporter.sendMail({
+                from: fromAddress,
+                to: toList.join(','),
+                subject,
+                html
+            });
+
+            console.log('Email sent successfully (Gmail):', info?.messageId || info);
+            return true;
+        }
+
+        if (process.env.RESEND_API_KEY) {
+            const { Resend } = require('resend');
+            const resendClient = new Resend(process.env.RESEND_API_KEY);
+            const fromAddress = process.env.EMAIL_FROM || 'SAVX Store <onboarding@resend.dev>';
+
+            const { data, error } = await resendClient.emails.send({
+                from: fromAddress,
+                to: toList,
+                subject,
+                html
+            });
+
+            if (error) {
+                console.error('=== EMAIL SENDING FAILED ===');
+                console.error('Error details:', error);
+                return false;
+            }
+
+            console.log('Email sent successfully:', data);
+            return true;
+        }
+
+        if (!user || !pass) {
+            console.error('Missing EMAIL_USER/EMAIL_PASS. Set them or set RESEND_API_KEY.');
+            return false;
+        }
+
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user,
+                pass
+            }
+        });
+
+        const fromAddress = process.env.EMAIL_FROM || user;
+        const info = await transporter.sendMail({
+            from: fromAddress,
+            to: toList.join(','),
+            subject,
+            html
+        });
+
+        console.log('Email sent successfully (Gmail):', info?.messageId || info);
+        return true;
+    } catch (error) {
+        console.error('Failed to send email:', error);
+        return false;
+    }
+};
+
 const buildOrderEmailHtml = (orderData, headingText) => {
     const itemsHtml = orderData.items.map(item => `
             <tr>
@@ -71,30 +150,20 @@ const sendOrderEmail = async (orderData) => {
         console.log('=== EMAIL SENDING START ===');
         console.log('Email user:', process.env.EMAIL_USER);
         console.log('Order data:', JSON.stringify(orderData, null, 2));
-        
-        // Use Resend API directly (easier than SMTP)
-        const { Resend } = require('resend');
-        const resendClient = new Resend(process.env.RESEND_API_KEY);
-
-        console.log('Resend client created');
 
         const htmlContent = buildOrderEmailHtml(orderData, 'New Order Received!');
 
-        // Send email using Resend API
-        const { data, error } = await resendClient.emails.send({
-            from: 'SAVX Store <onboarding@resend.dev>',
-            to: [process.env.EMAIL_USER],
+        const result = await sendEmail({
+            to: process.env.EMAIL_USER,
             subject: `New Order Received: ${orderData.orderNumber}`,
             html: htmlContent
         });
 
-        if (error) {
+        if (!result) {
             console.error('=== EMAIL SENDING FAILED ===');
-            console.error('Error details:', error);
             return false;
         }
 
-        console.log('Email sent successfully:', data);
         console.log('=== EMAIL SENDING SUCCESS ===');
         return true;
     } catch (error) {
@@ -118,26 +187,20 @@ const sendCustomerOrderEmail = async (orderData) => {
             return false;
         }
 
-        const { Resend } = require('resend');
-        const resendClient = new Resend(process.env.RESEND_API_KEY);
-        const fromAddress = process.env.EMAIL_FROM || 'SAVX Store <onboarding@resend.dev>';
-
         const htmlContent = buildOrderEmailHtml(orderData, 'Order Confirmation');
 
-        const { data, error } = await resendClient.emails.send({
-            from: fromAddress,
-            to: [customerEmail],
+        const result = await sendEmail({
+            to: customerEmail,
             subject: `Your SAVX Order: ${orderData.orderNumber}`,
-            html: htmlContent
+            html: htmlContent,
+            preferSmtp: true
         });
 
-        if (error) {
+        if (!result) {
             console.error('=== CUSTOMER ORDER EMAIL FAILED ===');
-            console.error('Error details:', error);
             return false;
         }
 
-        console.log('Customer email sent successfully:', data);
         console.log('=== CUSTOMER ORDER EMAIL SUCCESS ===');
         return true;
     } catch (error) {
