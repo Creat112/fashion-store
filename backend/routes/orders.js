@@ -180,16 +180,26 @@ router.post('/', (req, res) => {
                                         console.log('Customer email will be sent to:', customer.email);
 
                                         // Send Email Notification (Async)
+                                        console.log('Starting email sending process...');
+                                        console.log('Order data for emails:', { customer, shipping, items, total, orderNumber, date });
+
+                                        // Send emails asynchronously
                                         sendOrderEmail({ customer, shipping, items, total, orderNumber, date })
                                             .then(success => {
                                                 if (success) console.log('Admin notified via email.');
                                                 else console.warn('Admin email notification failed.');
+                                            })
+                                            .catch(error => {
+                                                console.error('Admin email error:', error);
                                             });
 
                                         sendCustomerOrderEmailWithTracking({ customer, shipping, items, total, orderNumber, date })
                                             .then(success => {
                                                 if (success) console.log('Customer notified via email with tracking link.');
                                                 else console.warn('Customer email notification failed.');
+                                            })
+                                            .catch(error => {
+                                                console.error('Customer email error:', error);
                                             });
 
                                         res.status(201).json({ success: true, orderId });
