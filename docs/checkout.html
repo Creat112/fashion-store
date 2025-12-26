@@ -8,6 +8,113 @@
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/checkout.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+    
+    <style>
+        .payment-methods {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .payment-option {
+            flex: 1;
+        }
+        
+        .payment-option input[type="radio"] {
+            display: none;
+        }
+        
+        .payment-label {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .payment-label:hover {
+            border-color: #007bff;
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+        }
+        
+        .payment-option input[type="radio"]:checked + .payment-label {
+            border-color: #007bff;
+            background: #f8f9ff;
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+        }
+        
+        .payment-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            color: white;
+        }
+        
+        .creditcard-icon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .cash-icon {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .card-details {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+        
+        .card-details.hidden {
+            display: none;
+        }
+        
+        .card-details {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .card-row {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .card-row .form-group {
+            flex: 1;
+        }
+        
+        #cardNumber, #expiryDate, #cvv, #cardName {
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+        }
+        
+        #cardNumber:focus, #expiryDate:focus, #cvv:focus, #cardName:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+        
+        @media (max-width: 768px) {
+            .payment-methods {
+                flex-direction: column;
+            }
+            
+            .card-row {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+    </style>
 
    
 </head>
@@ -77,6 +184,52 @@
                     <div class="form-group">
                         <label for="notes">Order Notes (Optional)</label>
                         <textarea id="notes" class="form-control" rows="3" placeholder="Notes about your order"></textarea>
+                    </div>
+                </div>
+            </div>
+                
+                <div class="form-section">
+                    <h2>Payment Method</h2>
+                    <div class="payment-methods">
+                        <div class="payment-option">
+                            <input type="radio" id="creditcard" name="paymentMethod" value="creditcard" checked>
+                            <label for="creditcard" class="payment-label">
+                                <div class="payment-icon creditcard-icon">
+                                    <i class="ri-bank-card-line"></i>
+                                </div>
+                                <span>Credit Card</span>
+                            </label>
+                        </div>
+                        <div class="payment-option">
+                            <input type="radio" id="cash" name="paymentMethod" value="cash">
+                            <label for="cash" class="payment-label">
+                                <div class="payment-icon cash-icon">
+                                    <i class="ri-money-dollar-circle-line"></i>
+                                </div>
+                                <span>Cash on Delivery</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="card-details">
+                        <div class="form-group">
+                            <label for="cardNumber">Card Number *</label>
+                            <input type="text" id="cardNumber" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                        </div>
+                        <div class="card-row">
+                            <div class="form-group">
+                                <label for="expiryDate">Expiry Date *</label>
+                                <input type="text" id="expiryDate" class="form-control" placeholder="MM/YY" maxlength="5" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="cvv">CVV *</label>
+                                <input type="text" id="cvv" class="form-control" placeholder="123" maxlength="4" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="cardName">Cardholder Name *</label>
+                            <input type="text" id="cardName" class="form-control" placeholder="John Doe" required>
+                        </div>
                     </div>
                 </div>
             </div>

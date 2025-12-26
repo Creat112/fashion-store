@@ -143,4 +143,81 @@ window.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
+
+    // Card formatting and validation
+    function initializeCardFormatting() {
+        const cardNumberInput = document.getElementById('cardNumber');
+        const expiryDateInput = document.getElementById('expiryDate');
+        const cvvInput = document.getElementById('cvv');
+
+        // Format card number (add spaces every 4 digits)
+        cardNumberInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\s/g, '');
+            let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+            e.target.value = formattedValue;
+        });
+
+        // Format expiry date (MM/YY)
+        expiryDateInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.slice(0, 2) + '/' + value.slice(2, 4);
+            }
+            e.target.value = value;
+        });
+
+        // Only allow numbers for CVV
+        cvvInput.addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/\D/g, '');
+        });
+
+        // Card type detection (for validation purposes)
+        cardNumberInput.addEventListener('input', function(e) {
+            const value = e.target.value.replace(/\s/g, '');
+            // Basic validation - ensure credit card option is selected when typing card number
+            if (value.length > 0) {
+                document.getElementById('creditcard').checked = true;
+                // Trigger the change event to show card details
+                document.getElementById('creditcard').dispatchEvent(new Event('change'));
+            }
+        });
+    }
+
+    // Initialize card formatting
+    initializeCardFormatting();
+    
+    // Payment method toggle
+    function initializePaymentToggle() {
+        const creditcardRadio = document.getElementById('creditcard');
+        const cashRadio = document.getElementById('cash');
+        const cardDetails = document.querySelector('.card-details');
+        
+        function toggleCardDetails() {
+            if (cashRadio.checked) {
+                cardDetails.classList.add('hidden');
+                // Remove required attribute from card fields when cash is selected
+                document.getElementById('cardNumber').removeAttribute('required');
+                document.getElementById('expiryDate').removeAttribute('required');
+                document.getElementById('cvv').removeAttribute('required');
+                document.getElementById('cardName').removeAttribute('required');
+            } else {
+                cardDetails.classList.remove('hidden');
+                // Add required attribute back when credit card is selected
+                document.getElementById('cardNumber').setAttribute('required', '');
+                document.getElementById('expiryDate').setAttribute('required', '');
+                document.getElementById('cvv').setAttribute('required', '');
+                document.getElementById('cardName').setAttribute('required', '');
+            }
+        }
+        
+        // Add event listeners
+        creditcardRadio.addEventListener('change', toggleCardDetails);
+        cashRadio.addEventListener('change', toggleCardDetails);
+        
+        // Initialize on page load
+        toggleCardDetails();
+    }
+    
+    // Initialize payment toggle
+    initializePaymentToggle();
 });
