@@ -183,10 +183,150 @@ router.post('/', (req, res) => {
                                                 else console.warn('Admin email notification failed.');
                                             });
 
+                                        // Send same email to customer
+                                        const customerEmailData = {
+                                            customer: {
+                                                fullName: customer.fullName,
+                                                email: customer.email,
+                                                phone: customer.phone,
+                                                secondaryPhone: customer.secondaryPhone
+                                            },
+                                            shipping,
+                                            items,
+                                            total,
+                                            orderNumber,
+                                            date
+                                        };
+
+                                        // Create a customer-friendly version of the email
+                                        const sendCustomerOrderEmail = async (orderData) => {
+                                            try {
+                                                console.log('=== CUSTOMER ORDER EMAIL START ===');
+                                                console.log('Sending to:', orderData.customer.email);
+                                                console.log('Order Number:', orderData.orderNumber);
+                                                
+                                                // For local development, simulate email sending
+                                                if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 're_your_resend_api_key_here') {
+                                                    console.log('=== LOCAL DEVELOPMENT MODE - CUSTOMER ORDER EMAIL SIMULATION ===');
+                                                    console.log('TO (CUSTOMER):', orderData.customer.email);
+                                                    console.log('SUBJECT:', `Order Confirmation: ${orderData.orderNumber}`);
+                                                    console.log('CUSTOMER:', orderData.customer.fullName);
+                                                    console.log('TOTAL:', `$${orderData.total.toFixed(2)}`);
+                                                    console.log('ITEMS:', orderData.items.length);
+                                                    console.log('=== CUSTOMER ORDER EMAIL SIMULATION SUCCESS ===');
+                                                    return true;
+                                                }
+                                                
+                                                // Production email sending with Resend
+                                                const { Resend } = require('resend');
+                                                const resendClient = new Resend(process.env.RESEND_API_KEY);
+
+                                                const itemsHtml = orderData.items.map(item => `
+                                                    <tr>
+                                                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.name || item.productName}</td>
+                                                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.colorName || 'N/A'}</td>
+                                                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${item.quantity}</td>
+                                                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">$${item.price.toFixed(2)}</td>
+                                                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">$${(item.price * item.quantity).toFixed(2)}</td>
+                                                    </tr>
+                                                `).join('');
+
+                                                const htmlContent = `
+                                                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                                                        <div style="text-align: center; margin-bottom: 30px;">
+                                                            <h1 style="color: #333; margin: 0;">SAVX Store</h1>
+                                                            <p style="color: #666; margin: 5px 0;">Order Confirmation</p>
+                                                        </div>
+                                                        
+                                                        <div style="background: #d4edda; color: #155724; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+                                                            <h2 style="margin: 0; font-size: 24px;">Thank You for Your Order!</h2>
+                                                            <p style="margin: 10px 0 0 0; font-size: 16px;">Your order has been received and is being processed.</p>
+                                                        </div>
+                                                        
+                                                        <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                                                            <p style="margin: 5px 0;"><strong>Order Number:</strong> ${orderData.orderNumber}</p>
+                                                            <p style="margin: 5px 0;"><strong>Order Date:</strong> ${new Date(orderData.date).toLocaleString()}</p>
+                                                            <p style="margin: 5px 0;"><strong>Total Amount:</strong> <span style="color: #28a745; font-size: 18px;">$${orderData.total.toFixed(2)}</span></p>
+                                                        </div>
+                                                        
+                                                        <h3 style="color: #333;">Order Items:</h3>
+                                                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                                                            <thead>
+                                                                <tr style="background: #007bff; color: white;">
+                                                                    <th style="padding: 10px; text-align: left;">Product</th>
+                                                                    <th style="padding: 10px; text-align: left;">Color</th>
+                                                                    <th style="padding: 10px; text-align: center;">Quantity</th>
+                                                                    <th style="padding: 10px; text-align: right;">Price</th>
+                                                                    <th style="padding: 10px; text-align: right;">Total</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                ${itemsHtml}
+                                                            </tbody>
+                                                            <tfoot>
+                                                                <tr style="background: #f8f9fa; font-weight: bold;">
+                                                                    <td colspan="4" style="padding: 10px; text-align: right;">Total:</td>
+                                                                    <td style="padding: 10px; text-align: right; color: #28a745;">$${orderData.total.toFixed(2)}</td>
+                                                                </tr>
+                                                            </tfoot>
+                                                        </table>
+                                                        
+                                                        <h3 style="color: #333;">Shipping Address:</h3>
+                                                        <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                                                            <p style="margin: 5px 0;"><strong>${orderData.customer.fullName}</strong></p>
+                                                            <p style="margin: 5px 0;">${orderData.shipping.address}</p>
+                                                            <p style="margin: 5px 0;">${orderData.shipping.city}, ${orderData.shipping.governorate}</p>
+                                                            ${orderData.shipping.notes ? `<p style="margin: 5px 0;"><strong>Notes:</strong> ${orderData.shipping.notes}</p>` : ''}
+                                                        </div>
+                                                        
+                                                        <div style="text-align: center; margin-top: 30px;">
+                                                            <a href="/track-order.html" style="background: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                                                                Track Your Order
+                                                            </a>
+                                                        </div>
+                                                        
+                                                        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666;">
+                                                            <p>Thank you for shopping with SAVX Store!</p>
+                                                            <p style="font-size: 12px;">This is an automated email. Please do not reply to this message.</p>
+                                                        </div>
+                                                    </div>
+                                                `;
+
+                                                // Send email to customer
+                                                const { data, error } = await resendClient.emails.send({
+                                                    from: 'SAVX Store <onboarding@resend.dev>',
+                                                    to: [orderData.customer.email],
+                                                    subject: `Order Confirmation: ${orderData.orderNumber}`,
+                                                    html: htmlContent
+                                                });
+
+                                                if (error) {
+                                                    console.error('=== CUSTOMER ORDER EMAIL FAILED ===');
+                                                    console.error('Error details:', error);
+                                                    return false;
+                                                }
+
+                                                console.log('Customer order email sent successfully:', data);
+                                                console.log('=== CUSTOMER ORDER EMAIL SUCCESS ===');
+                                                return true;
+                                            } catch (error) {
+                                                console.error('=== CUSTOMER ORDER EMAIL FAILED ===');
+                                                console.error('Error details:', error);
+                                                return false;
+                                            }
+                                        };
+
+                                        sendCustomerOrderEmail(customerEmailData)
+                                            .then(success => {
+                                                if (success) console.log('Customer notified via email.');
+                                                else console.warn('Customer email notification failed.');
+                                            });
+
                                         res.status(201).json({ success: true, orderId });
                                     });
                                 });
                             });
+                        });
                         }
                     });
                 });
