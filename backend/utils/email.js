@@ -83,7 +83,7 @@ const sendCustomerOrderEmailWithTracking = async (orderData) => {
     try {
         console.log('=== CUSTOMER ORDER EMAIL WITH TRACKING START ===');
         console.log('Customer Email:', orderData?.customer?.email);
-        console.log('Environment check - RESEND_API_KEY:', process.env.RESEND_API_KEY ? 'SET' : 'NOT SET');
+        console.log('Environment check - CUSTOMER_RESEND_API:', process.env.CUSTOMER_RESEND_API ? 'SET' : 'NOT SET');
         console.log('Environment check - EMAIL_USER:', process.env.EMAIL_USER ? 'SET' : 'NOT SET');
 
         const customerEmail = orderData?.customer?.email;
@@ -92,8 +92,8 @@ const sendCustomerOrderEmailWithTracking = async (orderData) => {
             return false;
         }
 
-        if (!process.env.RESEND_API_KEY && !process.env.EMAIL_USER) {
-            console.error('No email service configured. Set RESEND_API_KEY or EMAIL_USER/EMAIL_PASS');
+        if (!process.env.CUSTOMER_RESEND_API && !process.env.EMAIL_USER) {
+            console.error('No email service configured. Set CUSTOMER_RESEND_API or EMAIL_USER/EMAIL_PASS');
             return false;
         }
 
@@ -121,17 +121,25 @@ const sendCustomerOrderEmailWithTracking = async (orderData) => {
             </div>
         `;
 
-        const result = await sendEmail({
+        // Use customer-specific Resend API
+        const { Resend } = require('resend');
+        const resendClient = new Resend(process.env.CUSTOMER_RESEND_API);
+        const fromAddress = process.env.EMAIL_FROM || 'SAVX Store <onboarding@resend.dev>';
+
+        const { data, error } = await resendClient.emails.send({
+            from: fromAddress,
             to: customerEmail,
             subject: `Order Confirmation: ${orderData.orderNumber}`,
             html: htmlContent
         });
 
-        if (!result) {
-            console.error('=== CUSTOMER ORDER EMAIL WITH TRACKING FAILED ===');
+        if (error) {
+            console.error('=== CUSTOMER EMAIL SENDING FAILED ===');
+            console.error('Error details:', error);
             return false;
         }
 
+        console.log('Customer email sent successfully:', data);
         console.log('=== CUSTOMER ORDER EMAIL WITH TRACKING SUCCESS ===');
         return true;
     } catch (error) {
