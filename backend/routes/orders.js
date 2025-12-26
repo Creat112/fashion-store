@@ -175,6 +175,9 @@ router.post('/', (req, res) => {
                                             return res.status(500).json({ error: err.message });
                                         }
                                         console.log('Order and stock updates committed successfully.');
+                                        console.log('=== SENDING EMAILS ===');
+                                        console.log('Admin email will be sent to:', process.env.EMAIL_USER);
+                                        console.log('Customer email will be sent to:', customer.email);
 
                                         // Send Email Notification (Async)
                                         sendOrderEmail({ customer, shipping, items, total, orderNumber, date })
