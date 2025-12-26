@@ -55,6 +55,37 @@ router.get('/', (req, res) => {
     });
 });
 
+// Get orders for logged-in user (for track order page)
+router.get('/user', (req, res) => {
+    console.log('User orders endpoint hit!', req.query);
+    
+    const userEmail = req.query.email;
+    
+    if (!userEmail) {
+        return res.status(401).json({ 
+            error: 'User not authenticated. Please provide email parameter.' 
+        });
+    }
+
+    const db = getDB();
+    const query = `
+        SELECT o.id, o.orderNumber, o.total, o.status, o.date
+        FROM orders o 
+        WHERE o.customerEmail = ?
+        ORDER BY o.date DESC
+    `;
+
+    db.all(query, [userEmail], (err, rows) => {
+        if (err) {
+            console.error('Database error fetching user orders:', err);
+            return res.status(500).json({ error: err.message });
+        }
+
+        console.log('Found orders for user:', userEmail, rows.length);
+        res.json(rows);
+    });
+});
+
 const { sendOrderEmail, sendOrderStatusUpdateEmail } = require('../utils/email');
 
 // Create new order with stock validation
