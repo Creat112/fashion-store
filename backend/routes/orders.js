@@ -55,7 +55,7 @@ router.get('/', (req, res) => {
     });
 });
 
-const { sendOrderEmail, sendOrderStatusUpdateEmail } = require('../utils/email');
+const { sendOrderEmail, sendCustomerOrderEmail, sendOrderStatusUpdateEmail } = require('../utils/email');
 
 // Create new order with stock validation
 router.post('/', (req, res) => {
@@ -181,6 +181,12 @@ router.post('/', (req, res) => {
                                             .then(success => {
                                                 if (success) console.log('Admin notified via email.');
                                                 else console.warn('Admin email notification failed.');
+                                            });
+
+                                        sendCustomerOrderEmail({ customer, shipping, items, total, orderNumber, date })
+                                            .then(success => {
+                                                if (success) console.log('Customer notified via email.');
+                                                else console.warn('Customer email notification failed.');
                                             });
 
                                         res.status(201).json({ success: true, orderId });

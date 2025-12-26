@@ -1,18 +1,7 @@
 const nodemailer = require('nodemailer');
 
-const sendOrderEmail = async (orderData) => {
-    try {
-        console.log('=== EMAIL SENDING START ===');
-        console.log('Email user:', process.env.EMAIL_USER);
-        console.log('Order data:', JSON.stringify(orderData, null, 2));
-        
-        // Use Resend API directly (easier than SMTP)
-        const { Resend } = require('resend');
-        const resendClient = new Resend(process.env.RESEND_API_KEY);
-
-        console.log('Resend client created');
-
-        const itemsHtml = orderData.items.map(item => `
+const buildOrderEmailHtml = (orderData, headingText) => {
+    const itemsHtml = orderData.items.map(item => `
             <tr>
                 <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.name || item.productName}</td>
                 <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.colorName || 'N/A'}</td>
@@ -22,9 +11,9 @@ const sendOrderEmail = async (orderData) => {
             </tr>
         `).join('');
 
-        const htmlContent = `
+    return `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h1 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">New Order Received!</h1>
+                <h1 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">${headingText}</h1>
                 
                 <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
                     <p style="margin: 5px 0;"><strong>Order Number:</strong> ${orderData.orderNumber}</p>
@@ -75,6 +64,21 @@ const sendOrderEmail = async (orderData) => {
                 </div>
             </div>
         `;
+};
+
+const sendOrderEmail = async (orderData) => {
+    try {
+        console.log('=== EMAIL SENDING START ===');
+        console.log('Email user:', process.env.EMAIL_USER);
+        console.log('Order data:', JSON.stringify(orderData, null, 2));
+        
+        // Use Resend API directly (easier than SMTP)
+        const { Resend } = require('resend');
+        const resendClient = new Resend(process.env.RESEND_API_KEY);
+
+        console.log('Resend client created');
+
+        const htmlContent = buildOrderEmailHtml(orderData, 'New Order Received!');
 
         // Send email using Resend API
         const { data, error } = await resendClient.emails.send({
@@ -103,6 +107,46 @@ const sendOrderEmail = async (orderData) => {
     }
 };
 
+const sendCustomerOrderEmail = async (orderData) => {
+    try {
+        console.log('=== CUSTOMER ORDER EMAIL SENDING START ===');
+        console.log('Customer Email:', orderData?.customer?.email);
+
+        const customerEmail = orderData?.customer?.email;
+        if (!customerEmail) {
+            console.error('Missing customer email in orderData');
+            return false;
+        }
+
+        const { Resend } = require('resend');
+        const resendClient = new Resend(process.env.RESEND_API_KEY);
+        const fromAddress = process.env.EMAIL_FROM || 'SAVX Store <onboarding@resend.dev>';
+
+        const htmlContent = buildOrderEmailHtml(orderData, 'Order Confirmation');
+
+        const { data, error } = await resendClient.emails.send({
+            from: fromAddress,
+            to: [customerEmail],
+            subject: `Your SAVX Order: ${orderData.orderNumber}`,
+            html: htmlContent
+        });
+
+        if (error) {
+            console.error('=== CUSTOMER ORDER EMAIL FAILED ===');
+            console.error('Error details:', error);
+            return false;
+        }
+
+        console.log('Customer email sent successfully:', data);
+        console.log('=== CUSTOMER ORDER EMAIL SUCCESS ===');
+        return true;
+    } catch (error) {
+        console.error('=== CUSTOMER ORDER EMAIL FAILED ===');
+        console.error('Error details:', error);
+        return false;
+    }
+};
+
 const sendOrderStatusUpdateEmail = async (orderData, newStatus, trackingNumber = null, estimatedDelivery = null) => {
     try {
         console.log('=== CUSTOMER EMAIL NOTIFICATION ===');
@@ -119,4 +163,4 @@ const sendOrderStatusUpdateEmail = async (orderData, newStatus, trackingNumber =
     }
 };
 
-module.exports = { sendOrderEmail, sendOrderStatusUpdateEmail };
+module.exports = { sendOrderEmail, sendCustomerOrderEmail, sendOrderStatusUpdateEmail };
