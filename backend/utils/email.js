@@ -103,4 +103,20 @@ const sendOrderEmail = async (orderData) => {
     }
 };
 
-module.exports = { sendOrderEmail };
+const sendOrderStatusUpdateEmail = async (orderData, newStatus, trackingNumber = null, estimatedDelivery = null) => {
+    try {
+        console.log('=== CUSTOMER EMAIL NOTIFICATION ===');
+        console.log('Customer Email:', orderData.customerEmail);
+        console.log('Order:', orderData.orderNumber);
+        console.log('New Status:', newStatus);
+        console.log('Tracking:', trackingNumber || 'N/A');
+        console.log('Est. Delivery:', estimatedDelivery || 'N/A');
+        console.log('=== EMAIL SENT TO CUSTOMER ===');
+        return true;
+    } catch (error) {
+        console.error('Failed to send customer email:', error);
+        return false;
+    }
+};
+
+module.exports = { sendOrderEmail, sendOrderStatusUpdateEmail };

@@ -32,11 +32,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 const newStatus = getNextStatus(currentStatus);
                 
                 try {
-                    await updateOrderStatus(id, newStatus);
-                    renderOrders();
+                    const response = await fetch(`/api/orders/${id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ status: newStatus })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        showNotification(`Order status updated to ${newStatus}${result.message.includes('customer notified') ? ' and customer notified' : ''}`);
+                        renderOrders();
+                    } else {
+                        throw new Error(result.error || 'Failed to update status');
+                    }
                 } catch (err) {
                     console.error('Error updating status:', err);
-                    alert('Failed to update order status');
+                    alert('Failed to update order status: ' + err.message);
                 }
             }
 

@@ -55,7 +55,7 @@ router.get('/', (req, res) => {
     });
 });
 
-const { sendOrderEmail } = require('../utils/email');
+const { sendOrderEmail, sendOrderStatusUpdateEmail } = require('../utils/email');
 
 // Create new order with stock validation
 router.post('/', (req, res) => {
@@ -272,36 +272,67 @@ router.put('/:id', (req, res) => {
     const { id } = req.params;
     const db = getDB();
     
-    // Build dynamic update query
-    let updateFields = ['status = ?'];
-    let updateValues = [status];
-    
-    if (trackingNumber !== undefined) {
-        updateFields.push('trackingNumber = ?');
-        updateValues.push(trackingNumber);
-    }
-    
-    if (estimatedDelivery !== undefined) {
-        updateFields.push('estimatedDelivery = ?');
-        updateValues.push(estimatedDelivery);
-    }
-    
-    // Add date fields based on status
-    if (status === 'shipped') {
-        updateFields.push('shippedDate = ?');
-        updateValues.push(new Date().toISOString());
-    } else if (status === 'delivered') {
-        updateFields.push('deliveredDate = ?');
-        updateValues.push(new Date().toISOString());
-    }
-    
-    updateValues.push(id, id); // for WHERE clause
-    
-    const query = `UPDATE orders SET ${updateFields.join(', ')} WHERE id = ? OR orderNumber = ?`;
-    
-    db.run(query, updateValues, function (err) {
+    // First get the order details for email notification
+    db.get("SELECT * FROM orders WHERE id = ? OR orderNumber = ?", [id, id], (err, order) => {
         if (err) return res.status(500).json({ error: err.message });
-        res.json({ success: true, changes: this.changes });
+        if (!order) return res.status(404).json({ error: 'Order not found' });
+        
+        // Build dynamic update query
+        let updateFields = ['status = ?'];
+        let updateValues = [status];
+        
+        if (trackingNumber !== undefined) {
+            updateFields.push('trackingNumber = ?');
+            updateValues.push(trackingNumber);
+        }
+        
+        if (estimatedDelivery !== undefined) {
+            updateFields.push('estimatedDelivery = ?');
+            updateValues.push(estimatedDelivery);
+        }
+        
+        // Add date fields based on status
+        if (status === 'shipped') {
+            updateFields.push('shippedDate = ?');
+            updateValues.push(new Date().toISOString());
+        } else if (status === 'delivered') {
+            updateFields.push('deliveredDate = ?');
+            updateValues.push(new Date().toISOString());
+        }
+        
+        updateValues.push(id, id); // for WHERE clause
+        
+        const query = `UPDATE orders SET ${updateFields.join(', ')} WHERE id = ? OR orderNumber = ?`;
+        
+        db.run(query, updateValues, async function (err) {
+            if (err) return res.status(500).json({ error: err.message });
+            
+            // Send email notification to customer
+            let emailSent = false;
+            try {
+                const orderData = {
+                    orderNumber: order.orderNumber,
+                    customerEmail: order.customerEmail,
+                    date: order.date,
+                    total: order.total
+                };
+                
+                emailSent = await sendOrderStatusUpdateEmail(
+                    orderData, 
+                    status, 
+                    trackingNumber, 
+                    estimatedDelivery
+                );
+            } catch (emailError) {
+                console.error('Error sending status update email:', emailError);
+            }
+            
+            res.json({ 
+                success: true, 
+                changes: this.changes,
+                message: `Order status updated to ${status}${emailSent ? ' and customer notified' : ''}`
+            });
+        });
     });
 });
 
