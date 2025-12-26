@@ -248,7 +248,7 @@ const sendCustomerOrderEmail = async (orderData) => {
             to: customerEmail,
             subject: `Your SAVX Order: ${orderData.orderNumber}`,
             html: htmlContent,
-            preferSmtp: true
+            preferSmtp: false
         });
 
         if (!result) {
