@@ -81,33 +81,55 @@ const sendEmail = async ({ to, subject, html, preferSmtp = false }) => {
 
 const sendCustomerOrderEmailWithTracking = async (orderData) => {
     try {
-        const { Resend } = require('resend');
-        const resend = new Resend(process.env.RESEND_API_KEY);
-        const clientEmail = orderData.customer.email;
-        const trackingLink = `https://yourdomain.com/track-order.html?order=${orderData.orderNumber}`;
+        console.log('=== CUSTOMER ORDER EMAIL WITH TRACKING START ===');
+        console.log('Customer Email:', orderData?.customer?.email);
 
-        const { data, error } = await resend.emails.send({
-            from: "Store <onboarding@resend.dev>",
-            to: clientEmail,
-            subject: `Order Confirmation: ${orderData.orderNumber}`,
-            html: `
-              <h2>Thank you for your order!</h2>
-              <p>Your order is being processed.</p>
-              <p><strong>Order ID:</strong> ${orderData.orderNumber}</p>
-              <p><strong>Track your order:</strong> <a href="${trackingLink}">${trackingLink}</a></p>
-              <p>Order details: ${JSON.stringify(orderData)}</p>
-            `
-        });
-
-        if (error) {
-            console.error('Email sending failed:', error);
+        const customerEmail = orderData?.customer?.email;
+        if (!customerEmail) {
+            console.error('Missing customer email in orderData');
             return false;
         }
 
-        console.log('Customer email sent:', data);
+        const trackingLink = `https://yourdomain.com/track-order.html?order=${orderData.orderNumber}`;
+        
+        const htmlContent = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #333;">Thank you for your order!</h2>
+                <p style="color: #666;">Your order is being processed.</p>
+                
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                    <p style="margin: 5px 0;"><strong>Order ID:</strong> ${orderData.orderNumber}</p>
+                    <p style="margin: 5px 0;"><strong>Total:</strong> <span style="color: #28a745;">$${orderData.total.toFixed(2)}</span></p>
+                    <p style="margin: 5px 0;"><strong>Date:</strong> ${new Date(orderData.date).toLocaleString()}</p>
+                </div>
+                
+                <div style="background: #e7f3ff; padding: 15px; border-radius: 5px; margin-bottom: 20px; text-align: center;">
+                    <p style="margin: 0 0 10px 0;"><strong>Track your order:</strong></p>
+                    <a href="${trackingLink}" style="display: inline-block; background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Track Order Status</a>
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666;">
+                    <p>This is an automated notification from SAVX Store.</p>
+                </div>
+            </div>
+        `;
+
+        const result = await sendEmail({
+            to: customerEmail,
+            subject: `Order Confirmation: ${orderData.orderNumber}`,
+            html: htmlContent
+        });
+
+        if (!result) {
+            console.error('=== CUSTOMER ORDER EMAIL WITH TRACKING FAILED ===');
+            return false;
+        }
+
+        console.log('=== CUSTOMER ORDER EMAIL WITH TRACKING SUCCESS ===');
         return true;
     } catch (error) {
-        console.error('Failed to send customer email:', error);
+        console.error('=== CUSTOMER ORDER EMAIL WITH TRACKING FAILED ===');
+        console.error('Error details:', error);
         return false;
     }
 };
