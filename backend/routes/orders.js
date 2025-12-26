@@ -200,15 +200,108 @@ router.post('/', (req, res) => {
     });
 });
 
-// Update order status
-router.put('/:id', (req, res) => {
-    const { status } = req.body;
-    const { id } = req.params;
-
+// Track order by order number
+router.get('/track/:orderNumber', (req, res) => {
+    const { orderNumber } = req.params;
     const db = getDB();
-    db.run("UPDATE orders SET status = ? WHERE id = ? OR orderNumber = ?", [status, id, id], function (err) {
+    
+    const query = `
+        SELECT o.*, i.productId, i.quantity, i.price, i.productName, i.colorId, i.colorName,
+               p.image as productImage
+        FROM orders o 
+        LEFT JOIN order_items i ON o.id = i.orderId
+        LEFT JOIN products p ON i.productId = p.id
+        WHERE o.orderNumber = ?
+    `;
+
+    db.get(query, [orderNumber], (err, row) => {
         if (err) return res.status(500).json({ error: err.message });
-        res.json({ success: true });
+        if (!row) return res.status(404).json({ error: 'Order not found' });
+
+        // Get all items for this order
+        const itemsQuery = `
+            SELECT i.*, p.image as productImage
+            FROM order_items i 
+            LEFT JOIN products p ON i.productId = p.id
+            WHERE i.orderId = ?
+        `;
+        
+        db.all(itemsQuery, [row.id], (err, items) => {
+            if (err) return res.status(500).json({ error: err.message });
+            
+            const order = {
+                id: row.id,
+                orderNumber: row.orderNumber,
+                total: row.total,
+                status: row.status,
+                date: row.date,
+                trackingNumber: row.trackingNumber,
+                estimatedDelivery: row.estimatedDelivery,
+                shippedDate: row.shippedDate,
+                deliveredDate: row.deliveredDate,
+                customer: {
+                    fullName: row.customerName,
+                    email: row.customerEmail,
+                    phone: row.customerPhone
+                },
+                shipping: {
+                    address: row.shippingAddress,
+                    city: row.shippingCity,
+                    governorate: row.shippingGov,
+                    notes: row.notes
+                },
+                items: items.map(item => ({
+                    productId: item.productId,
+                    quantity: item.quantity,
+                    price: item.price,
+                    name: item.productName,
+                    colorId: item.colorId,
+                    colorName: item.colorName,
+                    image: item.productImage || item.image
+                }))
+            };
+
+            res.json(order);
+        });
+    });
+});
+
+// Update order status with tracking information
+router.put('/:id', (req, res) => {
+    const { status, trackingNumber, estimatedDelivery } = req.body;
+    const { id } = req.params;
+    const db = getDB();
+    
+    // Build dynamic update query
+    let updateFields = ['status = ?'];
+    let updateValues = [status];
+    
+    if (trackingNumber !== undefined) {
+        updateFields.push('trackingNumber = ?');
+        updateValues.push(trackingNumber);
+    }
+    
+    if (estimatedDelivery !== undefined) {
+        updateFields.push('estimatedDelivery = ?');
+        updateValues.push(estimatedDelivery);
+    }
+    
+    // Add date fields based on status
+    if (status === 'shipped') {
+        updateFields.push('shippedDate = ?');
+        updateValues.push(new Date().toISOString());
+    } else if (status === 'delivered') {
+        updateFields.push('deliveredDate = ?');
+        updateValues.push(new Date().toISOString());
+    }
+    
+    updateValues.push(id, id); // for WHERE clause
+    
+    const query = `UPDATE orders SET ${updateFields.join(', ')} WHERE id = ? OR orderNumber = ?`;
+    
+    db.run(query, updateValues, function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ success: true, changes: this.changes });
     });
 });
 

@@ -125,8 +125,36 @@ const createTables = () => {
             shippingAddress TEXT,
             shippingCity TEXT,
             shippingGov TEXT,
-            notes TEXT
-        )`);
+            notes TEXT,
+            trackingNumber TEXT,
+            estimatedDelivery TEXT,
+            shippedDate TEXT,
+            deliveredDate TEXT
+        )`, (err) => {
+            if (!err) {
+                // Add tracking columns if they don't exist (migration)
+                db.run("ALTER TABLE orders ADD COLUMN trackingNumber TEXT", (err) => {
+                    if (err && !err.message.includes("duplicate column name")) {
+                        console.error("Error adding trackingNumber column:", err.message);
+                    }
+                });
+                db.run("ALTER TABLE orders ADD COLUMN estimatedDelivery TEXT", (err) => {
+                    if (err && !err.message.includes("duplicate column name")) {
+                        console.error("Error adding estimatedDelivery column:", err.message);
+                    }
+                });
+                db.run("ALTER TABLE orders ADD COLUMN shippedDate TEXT", (err) => {
+                    if (err && !err.message.includes("duplicate column name")) {
+                        console.error("Error adding shippedDate column:", err.message);
+                    }
+                });
+                db.run("ALTER TABLE orders ADD COLUMN deliveredDate TEXT", (err) => {
+                    if (err && !err.message.includes("duplicate column name")) {
+                        console.error("Error adding deliveredDate column:", err.message);
+                    }
+                });
+            }
+        });
 
         // Order Items Table
         db.run(`CREATE TABLE IF NOT EXISTS order_items (

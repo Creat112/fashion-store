@@ -11,13 +11,11 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, '../docs'))); // Serve static files from docs folder
-app.use('/products', express.static(path.join(__dirname, '../products'))); // Serve product images
 
 // Database initialization
 initDB();
 
-// Routes
+// API Routes (must come before static files)
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
 const cartRoutes = require('./routes/cart');
@@ -29,8 +27,16 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/payment', paymentRoutes);
 
-// Fallback for SPA (or just serve index.html)
+// Static files (serve after API routes)
+app.use(express.static(path.join(__dirname, '../docs'))); // Serve static files from docs folder
+app.use('/products', express.static(path.join(__dirname, '../products'))); // Serve product images
+
+// Fallback for SPA (only for non-API routes)
 app.get('*', (req, res) => {
+    // Don't intercept API routes
+    if (req.path.startsWith('/api/')) {
+        return res.status(404).json({ error: 'API endpoint not found' });
+    }
     res.sendFile(path.join(__dirname, '../docs/index.html'));
 });
 

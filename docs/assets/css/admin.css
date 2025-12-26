@@ -140,6 +140,37 @@ body {
   color: white;
 }
 
+.status-badge.processing {
+  background: #2196F3;
+  color: white;
+}
+
+.status-badge.shipped {
+  background: #9C27B0;
+  color: white;
+}
+
+.status-badge.delivered {
+  background: #4CAF50;
+  color: white;
+}
+
+.row.status-pending {
+  border-left: 4px solid #ff9800;
+}
+
+.row.status-processing {
+  border-left: 4px solid #2196F3;
+}
+
+.row.status-shipped {
+  border-left: 4px solid #9C27B0;
+}
+
+.row.status-delivered {
+  border-left: 4px solid #4CAF50;
+}
+
 .completed {
   opacity: 0.8;
   background: rgba(0, 0, 0, 0.02);

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <link rel="stylesheet" href="assets/css/track-order.css" />
+    <title>Track Order - SAVX</title>
+</head>
+
+<body>
+    <nav>
+        <div class="container nav-container">
+            <a href="index.html" class="logo">SAVX</a>
+            <button class="mobile-menu-btn" id="menu-btn" title="Open menu" aria-label="Open menu">
+                <i class="ri-menu-line"></i>
+            </button>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="products.html">Shop</a></li>
+                <li><a href="login.html">Login</a></li>
+                <li><a href="track-order.html" class="active">Track Order</a></li>
+                <li>
+                    <a href="cart.html" class="cart-link">
+                        <i class="ri-shopping-cart-line"></i>
+                        <span class="cart-count">0</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section class="track-order-section">
+            <div class="section-header">
+                <h1>Track Your Order</h1>
+                <p>Enter your order ID to check the status of your purchase</p>
+            </div>
+
+            <div class="track-order-form">
+                <form id="track-order-form">
+                    <div class="form-group">
+                        <label for="order-id">Order ID</label>
+                        <input 
+                            type="text" 
+                            id="order-id" 
+                            name="orderId" 
+                            placeholder="Enter your order ID (e.g., ORD-123456)"
+                            required
+                        >
+                        <small class="form-hint">You can find your order ID in your confirmation email</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="ri-search-line"></i>
+                        Track Order
+                    </button>
+                </form>
+            </div>
+
+            <div id="order-result" class="order-result" style="display: none;">
+                <!-- Order details will be displayed here -->
+            </div>
+
+            <div id="loading" class="loading" style="display: none;">
+                <i class="ri-loader-4-line animate-spin"></i>
+                <p>Tracking your order...</p>
+            </div>
+
+            <div id="error-message" class="error-message" style="display: none;">
+                <!-- Error messages will be displayed here -->
+            </div>
+        </section>
+
+        <section class="help-section">
+            <div class="help-content">
+                <h2>Need Help?</h2>
+                <div class="help-items">
+                    <div class="help-item">
+                        <i class="ri-mail-line"></i>
+                        <div>
+                            <h3>Email Support</h3>
+                            <p>support@savx.com</p>
+                        </div>
+                    </div>
+                    <div class="help-item">
+                        <i class="ri-phone-line"></i>
+                        <div>
+                            <h3>Phone Support</h3>
+                            <p>1-800-SAVX-HELP</p>
+                        </div>
+                    </div>
+                    <div class="help-item">
+                        <i class="ri-time-line"></i>
+                        <div>
+                            <h3>Business Hours</h3>
+                            <p>Mon-Fri: 9AM-6PM EST</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>SAVX</h3>
+                    <p>Your one-stop shop for the latest SAVX trends and styles.</p>
+                </div>
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="products.html">Shop</a></li>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Customer Service</h3>
+                    <ul class="footer-links">
+                        <li><a href="track-order.html">Track Order</a></li>
+                        <li><a href="#">Shipping Policy</a></li>
+                        <li><a href="#">Returns & Exchanges</a></li>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Size Guide</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/js/track-order.js"></script>
+</body>
+
+</html>

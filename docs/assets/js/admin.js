@@ -29,7 +29,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const id = statusBtn.dataset.id;
                 console.log('Status toggle clicked for order:', id);
                 const currentStatus = statusBtn.dataset.status;
-                const newStatus = currentStatus === 'completed' ? 'pending' : 'completed';
+                const newStatus = getNextStatus(currentStatus);
+                
                 try {
                     await updateOrderStatus(id, newStatus);
                     renderOrders();
@@ -196,6 +197,39 @@ function showNotification(msg) {
     div.textContent = msg;
     document.body.appendChild(div);
     setTimeout(() => div.remove(), 5000);
+}
+
+// -------------------------
+// Order Status Management
+// -------------------------
+function getNextStatus(currentStatus) {
+    const statusFlow = {
+        'pending': 'processing',
+        'processing': 'shipped',
+        'shipped': 'delivered',
+        'delivered': 'pending' // Allow cycling back for flexibility
+    };
+    return statusFlow[currentStatus] || 'pending';
+}
+
+function getStatusBadgeClass(status) {
+    const statusClasses = {
+        'pending': 'pending',
+        'processing': 'processing',
+        'shipped': 'shipped',
+        'delivered': 'delivered'
+    };
+    return statusClasses[status] || 'pending';
+}
+
+function getStatusButtonText(status) {
+    const buttonText = {
+        'pending': 'Start Processing',
+        'processing': 'Mark as Shipped',
+        'shipped': 'Mark as Delivered',
+        'delivered': 'Reset to Pending'
+    };
+    return buttonText[status] || 'Start Processing';
 }
 
 // -------------------------
@@ -586,28 +620,31 @@ async function renderOrders() {
     ordersListEl.innerHTML = '';
     orders.forEach(o => {
         const row = document.createElement('div');
-        const isCompleted = o.status === 'completed';
-        row.className = `row ${isCompleted ? 'completed' : ''}`;
+        const statusBadgeClass = getStatusBadgeClass(o.status);
+        const statusButtonText = getStatusButtonText(o.status);
+        row.className = `row status-${o.status}`;
         const date = new Date(o.date).toLocaleString();
         row.innerHTML = `
             <div class="left">
                 <div>
                     <strong>Order ${o.orderNumber || '—'}</strong> • 
                     <span class="small-muted">${date}</span>
-                    <span class="status-badge ${isCompleted ? 'completed' : 'pending'}">
-                        ${isCompleted ? 'Completed' : 'Pending'}
+                    <span class="status-badge ${statusBadgeClass}">
+                        ${o.status || 'pending'}
                     </span>
                 </div>
                 <div class="small-muted">${o.customer?.fullName || '—'} — ${o.shipping?.address || ''}</div>
                 <div class="order-items">
                     ${(o.items || []).map(it => `<div>${it.name} × ${it.quantity} • $${(it.price * it.quantity).toFixed(2)}${it.colorName ? ` (${it.colorName})` : ''}</div>`).join('')}
                 </div>
+                ${o.trackingNumber ? `<div class="small-muted"><strong>Tracking:</strong> ${o.trackingNumber}</div>` : ''}
+                ${o.estimatedDelivery ? `<div class="small-muted"><strong>Est. Delivery:</strong> ${new Date(o.estimatedDelivery).toLocaleDateString()}</div>` : ''}
             </div>
             <div class="actions">
                 <div><strong>$${(o.total || 0).toFixed(2)}</strong></div>
                 <div style="display: flex; gap: 8px;">
-                    <button class="status-toggle ${isCompleted ? 'completed' : ''}" data-id="${o.id}" data-status="${o.status}">
-                        ${isCompleted ? 'Mark as Pending' : 'Mark as Done'}
+                    <button class="status-toggle" data-id="${o.id}" data-status="${o.status}">
+                        ${statusButtonText}
                     </button>
                     <button class="btn danger delete-order" data-id="${o.id}">Delete</button>
                 </div>
