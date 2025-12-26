@@ -83,10 +83,17 @@ const sendCustomerOrderEmailWithTracking = async (orderData) => {
     try {
         console.log('=== CUSTOMER ORDER EMAIL WITH TRACKING START ===');
         console.log('Customer Email:', orderData?.customer?.email);
+        console.log('Environment check - RESEND_API_KEY:', process.env.RESEND_API_KEY ? 'SET' : 'NOT SET');
+        console.log('Environment check - EMAIL_USER:', process.env.EMAIL_USER ? 'SET' : 'NOT SET');
 
         const customerEmail = orderData?.customer?.email;
         if (!customerEmail) {
             console.error('Missing customer email in orderData');
+            return false;
+        }
+
+        if (!process.env.RESEND_API_KEY && !process.env.EMAIL_USER) {
+            console.error('No email service configured. Set RESEND_API_KEY or EMAIL_USER/EMAIL_PASS');
             return false;
         }
 
@@ -99,7 +106,7 @@ const sendCustomerOrderEmailWithTracking = async (orderData) => {
                 
                 <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
                     <p style="margin: 5px 0;"><strong>Order ID:</strong> ${orderData.orderNumber}</p>
-                    <p style="margin: 5px 0;"><strong>Total:</strong> <span style="color: #28a745;">$${orderData.total.toFixed(2)}</span></p>
+                    <p style="margin: 5px 0;"><strong>Total:</strong> <span style="color: #28a745;">EGP ${orderData.total.toFixed(2)}</span></p>
                     <p style="margin: 5px 0;"><strong>Date:</strong> ${new Date(orderData.date).toLocaleString()}</p>
                 </div>
                 
@@ -130,6 +137,9 @@ const sendCustomerOrderEmailWithTracking = async (orderData) => {
     } catch (error) {
         console.error('=== CUSTOMER ORDER EMAIL WITH TRACKING FAILED ===');
         console.error('Error details:', error);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+        console.error('Order data received:', JSON.stringify(orderData, null, 2));
         return false;
     }
 };
@@ -140,8 +150,8 @@ const buildOrderEmailHtml = (orderData, headingText) => {
                 <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.name || item.productName}</td>
                 <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.colorName || 'N/A'}</td>
                 <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${item.quantity}</td>
-                <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${item.price.toFixed(2)} EGP</td>
-                <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${(item.price * item.quantity).toFixed(2)} EGP</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">EGP ${item.price.toFixed(2)}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">EGP ${(item.price * item.quantity).toFixed(2)}</td>
             </tr>
         `).join('');
 
@@ -152,7 +162,7 @@ const buildOrderEmailHtml = (orderData, headingText) => {
                 <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
                     <p style="margin: 5px 0;"><strong>Order Number:</strong> ${orderData.orderNumber}</p>
                     <p style="margin: 5px 0;"><strong>Date:</strong> ${new Date(orderData.date).toLocaleString()}</p>
-                    <p style="margin: 5px 0;"><strong>Total:</strong> <span style="color: #28a745; font-size: 18px;">$${orderData.total.toFixed(2)}</span></p>
+                    <p style="margin: 5px 0;"><strong>Total:</strong> <span style="color: #28a745; font-size: 18px;">EGP ${orderData.total.toFixed(2)}</span></p>
                 </div>
                 
                 <h3 style="color: #333;">Customer Information:</h3>
@@ -188,7 +198,7 @@ const buildOrderEmailHtml = (orderData, headingText) => {
                     <tfoot>
                         <tr style="background: #f8f9fa; font-weight: bold;">
                             <td colspan="4" style="padding: 10px; text-align: right;">Total:</td>
-                            <td style="padding: 10px; text-align: right; color: #28a745;">$${orderData.total.toFixed(2)}</td>
+                            <td style="padding: 10px; text-align: right; color: #28a745;">EGP ${orderData.total.toFixed(2)}</td>
                         </tr>
                     </tfoot>
                 </table>
