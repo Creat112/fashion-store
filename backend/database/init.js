@@ -2,8 +2,8 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
 const dbPath = process.env.VERCEL
-    ? path.join('/tmp', 'fashion_store.db')
-    : path.resolve(__dirname, 'fashion_store.db');
+    ? path.join('/tmp', 'SAVX_store.db')
+    : path.resolve(__dirname, 'SAVX_store.db');
 // Railway allows persistence on the disk, so we use the local path.
 let db;
 
@@ -165,7 +165,7 @@ const seedAdmin = () => {
             console.log("Seeding admin user...");
             const admin = {
                 name: 'Admin User',
-                email: 'admin@fashion.com',
+                email: 'admin@SAVX.com',
                 password: 'admin123', // In real app, hash this!
                 role: 'admin',
                 createdAt: new Date().toISOString()

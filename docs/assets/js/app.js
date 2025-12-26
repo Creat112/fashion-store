@@ -498,7 +498,7 @@ function shareProduct(productId, productName) {
     event.stopPropagation();
     
     const productUrl = `${window.location.origin}/product-detail.html?id=${productId}`;
-    const shareText = `Check out this ${productName} from FASHION Store!`;
+    const shareText = `Check out this ${productName} from SAVX Store!`;
     
     // Check if Web Share API is available
     if (navigator.share) {

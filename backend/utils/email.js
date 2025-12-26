@@ -71,14 +71,14 @@ const sendOrderEmail = async (orderData) => {
                 </table>
                 
                 <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666;">
-                    <p>This is an automated notification from Fashion Store.</p>
+                    <p>This is an automated notification from SAVX Store.</p>
                 </div>
             </div>
         `;
 
         // Send email using Resend API
         const { data, error } = await resendClient.emails.send({
-            from: 'Fashion Store <onboarding@resend.dev>',
+            from: 'SAVX Store <onboarding@resend.dev>',
             to: [process.env.EMAIL_USER],
             subject: `New Order Received: ${orderData.orderNumber}`,
             html: htmlContent

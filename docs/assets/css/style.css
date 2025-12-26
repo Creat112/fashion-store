@@ -458,6 +458,121 @@ footer {
     }
 }
 
+/* Banner Section */
+.banner-section {
+    padding: 4rem 0;
+    background: url('../../products/banner.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: scroll;
+    background-repeat: no-repeat;
+    color: white;
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    transition: transform 0.3s ease-out;
+}
+
+.banner-content {
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+    justify-content: space-between;
+}
+
+.banner-text {
+    flex: 1;
+    max-width: 500px;
+}
+
+.banner-text h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: white;
+}
+
+.banner-text p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+    line-height: 1.6;
+}
+
+.btn-banner {
+    background: white;
+    color: #667eea;
+    font-weight: 600;
+    padding: 0.8rem 2rem;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.btn-banner:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    background: #f8f9fa;
+}
+
+.banner-image {
+    flex: 1;
+    max-width: 400px;
+}
+
+.banner-image img {
+    width: 100%;
+    height: auto;
+    border-radius: 15px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease;
+}
+
+.banner-image img:hover {
+    transform: scale(1.05);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .banner-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 2rem;
+    }
+    
+    .banner-text {
+        max-width: 100%;
+    }
+    
+    .banner-text h2 {
+        font-size: 2rem;
+    }
+    
+    .banner-text p {
+        font-size: 1.1rem;
+    }
+    
+    .banner-image {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .banner-section {
+        padding: 3rem 0;
+    }
+    
+    .banner-text h2 {
+        font-size: 1.8rem;
+    }
+    
+    .banner-text p {
+        font-size: 1rem;
+    }
+}
+
 /* Product Slider Styles */
 .all-products-section {
     padding: 3rem 0;
