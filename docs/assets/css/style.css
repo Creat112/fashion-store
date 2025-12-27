@@ -19,6 +19,19 @@ body {
     color: var(--text-color);
 }
 
+/* Payment Styles */
+.card-details {
+    display: none;
+}
+
+.card-details.hidden {
+    display: none;
+}
+
+.card-details:not(.hidden) {
+    display: block;
+}
+
 .hero {
     background-image: url('../images/parallax.jpg');
     background-size: cover;

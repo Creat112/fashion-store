@@ -87,12 +87,12 @@
                     <h2>Payment Method</h2>
                     <div class="payment-methods">
                         <div class="payment-option">
-                            <input type="radio" id="creditcard" name="paymentMethod" value="creditcard" checked>
-                            <label for="creditcard" class="payment-label">
-                                <div class="payment-icon creditcard-icon">
-                                    <i class="ri-bank-card-line"></i>
+                            <input type="radio" id="paymob" name="paymentMethod" value="paymob" checked>
+                            <label for="paymob" class="payment-label">
+                                <div class="payment-icon paymob-icon">
+                                    <i class="ri-bank-card-2-line"></i>
                                 </div>
-                                <span>Credit Card</span>
+                                <span>Credit/Debit Card (Paymob)</span>
                             </label>
                         </div>
                         <div class="payment-option">
@@ -106,7 +106,7 @@
                         </div>
                     </div>
                     
-                    <div class="card-details">
+                    <div class="card-details hidden">
                         <div class="form-group">
                             <label for="cardNumber">Card Number *</label>
                             <input type="text" id="cardNumber" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19" required>
@@ -161,16 +161,28 @@
                 <div class="footer-column">
                     <h3>Customer Service</h3>
                     <ul class="footer-links">
+                        <li><a href="track-order.html">Track Order</a></li>
                         <li><a href="#">Shipping Policy</a></li>
                         <li><a href="#">Returns & Exchanges</a></li>
                         <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Size Guide</a></li>
                     </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Connect With Us</h3>
+                    <div class="social-links">
+                        <a href="#"><i class="ri-facebook-fill"></i></a>
+                        <a href="#"><i class="ri-instagram-line"></i></a>
+                        <a href="#"><i class="ri-twitter-fill"></i></a>
+                        <a href="#"><i class="ri-pinterest-fill"></i></a>
+                    </div>
                 </div>
             </div>
         </div>
     </footer>
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="assets/js/paymob.js"></script>
     <script type="module" src="assets/js/app.js"></script>
     <script type="module" src="assets/js/checkout.js"></script>
 </body>

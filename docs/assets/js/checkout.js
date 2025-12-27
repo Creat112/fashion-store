@@ -114,6 +114,7 @@ window.addEventListener("DOMContentLoaded", () => {
             const city = document.getElementById("city").value;
             const address = document.getElementById("address").value;
             const notes = document.getElementById("notes").value || "No notes";
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
 
             const orderData = {
                 customer: { fullName, email, phone, secondaryPhone },
@@ -125,23 +126,106 @@ window.addEventListener("DOMContentLoaded", () => {
             };
 
             try {
-                // Direct order submission
-                const result = await api.post('/orders', orderData);
-
-                if (result.success || result.orderId) {
-                    sessionStorage.setItem("currentOrder", JSON.stringify(orderData));
-                    localStorage.removeItem("checkoutItems");
-
-                    // Direct redirect without waiting
-                    window.location.href = "thank-you.html";
+                if (paymentMethod === 'paymob') {
+                    // Handle Paymob payment
+                    await handlePaymobPayment(orderData);
                 } else {
-                    alert('Failed to place order: ' + (result.error || 'Unknown error'));
+                    // Handle other payment methods (existing logic)
+                    const result = await api.post('/orders', orderData);
+
+                    if (result.success || result.orderId) {
+                        sessionStorage.setItem("currentOrder", JSON.stringify(orderData));
+                        localStorage.removeItem("checkoutItems");
+                        window.location.href = "thank-you.html";
+                    } else {
+                        alert('Failed to place order: ' + (result.error || 'Unknown error'));
+                    }
                 }
             } catch (error) {
                 console.error('Order error:', error);
                 alert('Error placing order. Please try again.');
             }
         });
+    }
+
+    // Handle Paymob payment
+    async function handlePaymobPayment(orderData) {
+        try {
+            // First create the order
+            const orderResult = await api.post('/orders', orderData);
+            
+            if (!orderResult.success && !orderResult.orderId) {
+                throw new Error('Failed to create order');
+            }
+
+            const orderId = orderResult.orderId || orderResult.id;
+            
+            // Initialize Paymob payment
+            const paymob = new PaymobPayment();
+            
+            // Format order data for Paymob
+            const paymobOrderData = paymob.formatOrderData(
+                { id: orderId, total: orderData.total },
+                {
+                    firstName: orderData.customer.fullName.split(' ')[0],
+                    lastName: orderData.customer.fullName.split(' ')[1] || '',
+                    email: orderData.customer.email,
+                    phoneNumber: orderData.customer.phone,
+                },
+                orderData.items
+            );
+
+            // Create payment session
+            const session = await paymob.createPaymentSession(paymobOrderData);
+            
+            // Store order info for result page
+            sessionStorage.setItem("currentOrder", JSON.stringify(orderData));
+            sessionStorage.setItem("pendingOrderId", orderId);
+            localStorage.removeItem("checkoutItems");
+            
+            // Redirect to Paymob payment page
+            window.location.href = session.paymentUrl;
+            
+        } catch (error) {
+            console.error('Paymob payment error:', error);
+            showPaymentError(error.message);
+        }
+    }
+
+    // Show payment error and return to checkout
+    function showPaymentError(message) {
+        // Create error message element
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'payment-error';
+        errorDiv.style.cssText = `
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border: 1px solid #f5c6cb;
+        `;
+        errorDiv.innerHTML = `
+            <h4 style="margin: 0 0 10px 0;">
+                <i class="ri-error-warning-line"></i> Payment Failed
+            </h4>
+            <p style="margin: 0;">${message}</p>
+            <p style="margin: 10px 0 0 0;">Please try again or choose a different payment method.</p>
+        `;
+
+        // Insert error message before order summary
+        const orderSummary = document.querySelector('.order-summary');
+        orderSummary.parentNode.insertBefore(errorDiv, orderSummary);
+
+        // Scroll to error message
+        errorDiv.scrollIntoView({ behavior: 'smooth' });
+
+        // Remove error after 10 seconds
+        setTimeout(() => {
+            if (errorDiv.parentNode) {
+                errorDiv.parentNode.removeChild(errorDiv);
+            }
+        }, 10000);
     }
 
     // Card formatting and validation
@@ -188,30 +272,24 @@ window.addEventListener("DOMContentLoaded", () => {
     
     // Payment method toggle
     function initializePaymentToggle() {
-        const creditcardRadio = document.getElementById('creditcard');
+        const paymobRadio = document.getElementById('paymob');
         const cashRadio = document.getElementById('cash');
         const cardDetails = document.querySelector('.card-details');
         
         function toggleCardDetails() {
-            if (cashRadio.checked) {
-                cardDetails.classList.add('hidden');
-                // Remove required attribute from card fields when cash is selected
-                document.getElementById('cardNumber').removeAttribute('required');
-                document.getElementById('expiryDate').removeAttribute('required');
-                document.getElementById('cvv').removeAttribute('required');
-                document.getElementById('cardName').removeAttribute('required');
-            } else {
-                cardDetails.classList.remove('hidden');
-                // Add required attribute back when credit card is selected
-                document.getElementById('cardNumber').setAttribute('required', '');
-                document.getElementById('expiryDate').setAttribute('required', '');
-                document.getElementById('cvv').setAttribute('required', '');
-                document.getElementById('cardName').setAttribute('required', '');
-            }
+            // Hide card details for both Paymob and Cash on Delivery
+            // Paymob handles card details on their own page
+            cardDetails.classList.add('hidden');
+            
+            // Remove required attribute from card fields
+            document.getElementById('cardNumber').removeAttribute('required');
+            document.getElementById('expiryDate').removeAttribute('required');
+            document.getElementById('cvv').removeAttribute('required');
+            document.getElementById('cardName').removeAttribute('required');
         }
         
         // Add event listeners
-        creditcardRadio.addEventListener('change', toggleCardDetails);
+        paymobRadio.addEventListener('change', toggleCardDetails);
         cashRadio.addEventListener('change', toggleCardDetails);
         
         // Initialize on page load

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Result - SAVX</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .payment-result-container {
+            max-width: 600px;
+            margin: 100px auto;
+            padding: 40px;
+            text-align: center;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .result-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .success-icon {
+            color: #28a745;
+        }
+
+        .error-icon {
+            color: #dc3545;
+        }
+
+        .processing-icon {
+            color: #ffc107;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .result-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .result-message {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #333;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #555;
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+
+        .order-details {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .order-details h4 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .order-details p {
+            margin: 5px 0;
+            color: #666;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #333;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @media (max-width: 768px) {
+            .payment-result-container {
+                margin: 50px 20px;
+                padding: 30px 20px;
+            }
+
+            .result-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="container nav-container">
+            <a href="index.html" class="logo">SAVX</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="products.html">Shop</a></li>
+                <li><a href="track-order.html">Track Order</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="payment-result-container">
+            <!-- Loading State -->
+            <div id="loading-state">
+                <div class="result-icon processing-icon">
+                    <i class="ri-loader-4-line"></i>
+                </div>
+                <h2 class="result-title">Processing Payment...</h2>
+                <p class="result-message">
+                    Please wait while we verify your payment status.
+                </p>
+                <div class="loading-spinner"></div>
+            </div>
+
+            <!-- Success State -->
+            <div id="success-state" style="display: none;">
+                <div class="result-icon success-icon">
+                    <i class="ri-checkbox-circle-line"></i>
+                </div>
+                <h2 class="result-title">Payment Successful!</h2>
+                <p class="result-message">
+                    Thank you for your order! Your payment has been processed successfully.
+                </p>
+                
+                <div class="order-details" id="order-details">
+                    <h4>Order Information</h4>
+                    <p><strong>Order ID:</strong> <span id="order-id">-</span></p>
+                    <p><strong>Transaction ID:</strong> <span id="transaction-id">-</span></p>
+                    <p><strong>Amount:</strong> <span id="order-amount">-</span> EGP</p>
+                    <p><strong>Date:</strong> <span id="order-date">-</span></p>
+                </div>
+
+                <div class="result-actions">
+                    <a href="index.html" class="btn btn-primary">
+                        <i class="ri-home-line"></i>
+                        Continue Shopping
+                    </a>
+                    <a href="track-order.html" class="btn btn-secondary">
+                        <i class="ri-truck-line"></i>
+                        Track Order
+                    </a>
+                </div>
+            </div>
+
+            <!-- Error State -->
+            <div id="error-state" style="display: none;">
+                <div class="result-icon error-icon">
+                    <i class="ri-close-circle-line"></i>
+                </div>
+                <h2 class="result-title">Payment Failed</h2>
+                <p class="result-message" id="error-message">
+                    We couldn't process your payment. Please try again or contact support.
+                </p>
+
+                <div class="result-actions">
+                    <a href="cart.html" class="btn btn-primary">
+                        <i class="ri-shopping-cart-line"></i>
+                        Try Again
+                    </a>
+                    <a href="index.html" class="btn btn-secondary">
+                        <i class="ri-home-line"></i>
+                        Back to Shop
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>SAVX</h3>
+                    <p>Your one-stop shop for the latest SAVX trends and styles.</p>
+                </div>
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="products.html">Shop</a></li>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Customer Service</h3>
+                    <ul class="footer-links">
+                        <li><a href="track-order.html">Track Order</a></li>
+                        <li><a href="#">Shipping Policy</a></li>
+                        <li><a href="#">Returns & Exchanges</a></li>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Size Guide</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Connect With Us</h3>
+                    <div class="social-links">
+                        <a href="#"><i class="ri-facebook-fill"></i></a>
+                        <a href="#"><i class="ri-instagram-line"></i></a>
+                        <a href="#"><i class="ri-twitter-fill"></i></a>
+                        <a href="#"><i class="ri-pinterest-fill"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/js/paymob.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const paymob = new PaymobPayment();
+            
+            // Get order ID from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('order_id');
+            
+            if (!orderId) {
+                showError('Order ID not found. Please contact support.');
+                return;
+            }
+
+            // Check payment status
+            try {
+                await checkPaymentStatus(orderId);
+            } catch (error) {
+                console.error('Payment status check error:', error);
+                showError('Unable to verify payment status. Please contact support.');
+            }
+        });
+
+        async function checkPaymentStatus(orderId) {
+            const paymob = new PaymobPayment();
+            let attempts = 0;
+            const maxAttempts = 10;
+
+            const pollStatus = async () => {
+                attempts++;
+                
+                try {
+                    const status = await paymob.checkPaymentStatus(orderId);
+                    
+                    if (status.status === 'success') {
+                        showSuccess(status);
+                        return;
+                    } else if (status.status === 'failed') {
+                        showError('Payment was declined. Please try a different payment method.');
+                        return;
+                    }
+
+                    // Continue polling if still pending
+                    if (attempts < maxAttempts) {
+                        setTimeout(pollStatus, 3000);
+                    } else {
+                        showError('Payment verification is taking longer than expected. Please check your email for confirmation.');
+                    }
+                } catch (error) {
+                    if (attempts < maxAttempts) {
+                        setTimeout(pollStatus, 3000);
+                    } else {
+                        showError('Unable to verify payment status. Please contact support.');
+                    }
+                }
+            };
+
+            // Start polling after a short delay
+            setTimeout(pollStatus, 2000);
+        }
+
+        function showSuccess(status) {
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('success-state').style.display = 'block';
+
+            // Update order details
+            document.getElementById('order-id').textContent = status.orderId;
+            document.getElementById('transaction-id').textContent = status.transactionId || 'Processing...';
+            document.getElementById('order-amount').textContent = status.amount || '0';
+            document.getElementById('order-date').textContent = new Date().toLocaleDateString();
+
+            // Store order info for tracking
+            localStorage.setItem('lastOrder', JSON.stringify({
+                id: status.orderId,
+                date: new Date().toISOString(),
+                amount: status.amount
+            }));
+
+            // Redirect to thank-you.html after 3 seconds
+            setTimeout(() => {
+                window.location.href = 'thank-you.html';
+            }, 3000);
+        }
+
+        function showError(message) {
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('error-state').style.display = 'block';
+            document.getElementById('error-message').textContent = message;
+
+            // Redirect back to checkout after 5 seconds
+            setTimeout(() => {
+                window.location.href = 'checkout.html';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

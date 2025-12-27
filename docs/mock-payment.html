@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock Payment Page - SAVX</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .mock-payment-container {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .payment-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .payment-header h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .payment-methods {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .payment-method {
+            padding: 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .payment-method:hover {
+            border-color: #007bff;
+        }
+
+        .payment-method.selected {
+            border-color: #007bff;
+            background: #f8f9ff;
+        }
+
+        .payment-method-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .payment-method-desc {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .card-form {
+            display: none;
+            margin-bottom: 20px;
+        }
+
+        .card-form.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .card-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .pay-button {
+            width: 100%;
+            padding: 15px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .pay-button:hover {
+            background: #218838;
+        }
+
+        .pay-button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .test-info {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #007bff;
+        }
+
+        .test-info h4 {
+            margin-bottom: 10px;
+            color: #0056b3;
+        }
+
+        .test-cards {
+            font-family: monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="container nav-container">
+            <a href="index.html" class="logo">SAVX</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="mock-payment-container">
+            <div class="payment-header">
+                <h2>Mock Payment Page</h2>
+                <p>This is a test payment page for development</p>
+            </div>
+
+            <div class="test-info">
+                <h4>Test Cards</h4>
+                <div class="test-cards">
+                    <div><strong>Success:</strong> 4000 0000 0000 0002</div>
+                    <div><strong>Failure:</strong> 4000 0000 0000 9995</div>
+                    <div><strong>Expiry:</strong> Any future date (12/25)</div>
+                    <div><strong>CVV:</strong> Any 3 digits (123)</div>
+                </div>
+            </div>
+
+            <div class="payment-methods">
+                <div class="payment-method" data-method="card">
+                    <div class="payment-method-title">
+                        <i class="ri-bank-card-line"></i> Credit/Debit Card
+                    </div>
+                    <div class="payment-method-desc">Visa, Mastercard, Meza</div>
+                </div>
+                <div class="payment-method" data-method="wallet">
+                    <div class="payment-method-title">
+                        <i class="ri-smartphone-line"></i> Mobile Wallet
+                    </div>
+                    <div class="payment-method-desc">Vodafone Cash, Etisalat Cash, Orange Money</div>
+                </div>
+                <div class="payment-method" data-method="cash">
+                    <div class="payment-method-title">
+                        <i class="ri-money-dollar-circle-line"></i> Cash on Delivery
+                    </div>
+                    <div class="payment-method-desc">Pay when you receive your order</div>
+                </div>
+            </div>
+
+            <div class="card-form" id="card-form">
+                <div class="form-group">
+                    <label>Card Number</label>
+                    <input type="text" id="card-number" placeholder="4000 0000 0000 0002" maxlength="19">
+                </div>
+                <div class="card-row">
+                    <div class="form-group">
+                        <label>Expiry Date</label>
+                        <input type="text" id="expiry" placeholder="MM/YY" maxlength="5">
+                    </div>
+                    <div class="form-group">
+                        <label>CVV</label>
+                        <input type="text" id="cvv" placeholder="123" maxlength="4">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Cardholder Name</label>
+                    <input type="text" id="card-name" placeholder="Test User">
+                </div>
+            </div>
+
+            <div class="card-form" id="wallet-form">
+                <div class="form-group">
+                    <label>Mobile Number</label>
+                    <input type="tel" id="mobile-number" placeholder="+201234567890">
+                </div>
+                <div class="form-group">
+                    <label>Wallet Provider</label>
+                    <select id="wallet-provider">
+                        <option value="vodafone">Vodafone Cash</option>
+                        <option value="etisalat">Etisalat Cash</option>
+                        <option value="orange">Orange Money</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="pay-button" id="pay-button" disabled>
+                Select Payment Method
+            </button>
+
+            <div class="loading" id="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Processing payment...</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let selectedMethod = null;
+        let paymentToken = null;
+
+        // Get payment token from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        paymentToken = urlParams.get('token');
+
+        // Payment method selection
+        document.querySelectorAll('.payment-method').forEach(method => {
+            method.addEventListener('click', function() {
+                document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
+                this.classList.add('selected');
+                
+                selectedMethod = this.dataset.method;
+                
+                // Hide all forms
+                document.querySelectorAll('.card-form').forEach(form => form.classList.remove('active'));
+                
+                // Show relevant form
+                if (selectedMethod === 'card') {
+                    document.getElementById('card-form').classList.add('active');
+                    document.getElementById('pay-button').textContent = 'Pay Now';
+                } else if (selectedMethod === 'wallet') {
+                    document.getElementById('wallet-form').classList.add('active');
+                    document.getElementById('pay-button').textContent = 'Pay with Wallet';
+                } else if (selectedMethod === 'cash') {
+                    document.getElementById('pay-button').textContent = 'Confirm Cash on Delivery';
+                }
+                
+                document.getElementById('pay-button').disabled = false;
+            });
+        });
+
+        // Card formatting
+        document.getElementById('card-number').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\s/g, '');
+            let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+            e.target.value = formattedValue;
+        });
+
+        document.getElementById('expiry').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.slice(0, 2) + '/' + value.slice(2, 4);
+            }
+            e.target.value = value;
+        });
+
+        document.getElementById('cvv').addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/\D/g, '');
+        });
+
+        // Payment processing
+        document.getElementById('pay-button').addEventListener('click', async function() {
+            if (!selectedMethod) return;
+
+            // Validation
+            if (selectedMethod === 'card') {
+                const cardNumber = document.getElementById('card-number').value.replace(/\s/g, '');
+                const expiry = document.getElementById('expiry').value;
+                const cvv = document.getElementById('cvv').value;
+                const name = document.getElementById('card-name').value;
+
+                if (!cardNumber || !expiry || !cvv || !name) {
+                    alert('Please fill all card details');
+                    return;
+                }
+
+                // Check for test success card
+                if (cardNumber === '4000000000000002') {
+                    await processPayment('success');
+                } else if (cardNumber === '4000000000009995') {
+                    await processPayment('failed');
+                } else {
+                    await processPayment('success'); // Default to success for testing
+                }
+            } else if (selectedMethod === 'wallet') {
+                const mobile = document.getElementById('mobile-number').value;
+                if (!mobile) {
+                    alert('Please enter mobile number');
+                    return;
+                }
+                await processPayment('success');
+            } else if (selectedMethod === 'cash') {
+                await processPayment('success');
+            }
+        });
+
+        async function processPayment(result) {
+            document.getElementById('pay-button').disabled = true;
+            document.getElementById('loading').style.display = 'block';
+
+            // Simulate payment processing
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            // Redirect to payment result page
+            const orderId = getOrderIdFromToken();
+            window.location.href = `payment-result.html?order_id=${orderId}&status=${result}`;
+        }
+
+        function getOrderIdFromToken() {
+            // In a real implementation, this would decode the token
+            // For testing, we'll generate a random order ID
+            return 'TEST-' + Math.floor(100000 + Math.random() * 900000);
+        }
+
+        // Auto-select card method for testing
+        setTimeout(() => {
+            document.querySelector('[data-method="card"]').click();
+        }, 500);
+    </script>
+</body>
+</html>

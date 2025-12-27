@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getDB } = require('../database/init');
+const { hashPassword, comparePassword } = require('../utils/passwordUtils');
 
 const { OAuth2Client } = require('google-auth-library');
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '633744806004-b1phb0vkuivleugtdrcmoumkior2sr31.apps.googleusercontent.com';
@@ -45,49 +46,78 @@ router.post('/google', async (req, res) => {
 });
 
 // Signup
-router.post('/signup', (req, res) => {
+router.post('/signup', async (req, res) => {
     const { name, email, password } = req.body;
     if (!name || !email || !password) {
         return res.status(400).json({ error: 'All fields are required' });
     }
 
-    const db = getDB();
-    const createdAt = new Date().toISOString();
+    // Validate password strength
+    if (password.length < 8) {
+        return res.status(400).json({ error: 'Password must be at least 8 characters long' });
+    }
 
-    // Default role is customer. Admin must be set manually in DB.
-    const role = 'customer';
+    try {
+        const db = getDB();
+        const createdAt = new Date().toISOString();
+        const role = 'customer';
 
-    const stmt = db.prepare("INSERT INTO users (name, email, password, role, createdAt) VALUES (?, ?, ?, ?, ?)");
-    stmt.run(name, email, password, role, createdAt, function (err) {
-        if (err) {
-            if (err.message.includes('UNIQUE constraint failed')) {
-                return res.status(409).json({ error: 'Email already exists' });
+        // Hash the password
+        const hashedPassword = await hashPassword(password);
+
+        const stmt = db.prepare("INSERT INTO users (name, email, password, role, createdAt) VALUES (?, ?, ?, ?, ?)");
+        stmt.run(name, email, hashedPassword, role, createdAt, function (err) {
+            if (err) {
+                if (err.message.includes('UNIQUE constraint failed')) {
+                    return res.status(409).json({ error: 'Email already exists' });
+                }
+                return res.status(500).json({ error: err.message });
             }
-            return res.status(500).json({ error: err.message });
-        }
-        res.status(201).json({ id: this.lastID, name, email, role, createdAt });
-    });
-    stmt.finalize();
+            res.status(201).json({ id: this.lastID, name, email, role, createdAt });
+        });
+        stmt.finalize();
+    } catch (error) {
+        console.error('Signup error:', error);
+        res.status(500).json({ error: 'Server error during signup' });
+    }
 });
 
 // Login
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) {
         return res.status(400).json({ error: 'Email and password required' });
     }
 
-    const db = getDB();
-    db.get("SELECT * FROM users WHERE email = ? AND password = ?", [email, password], (err, row) => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-        if (!row) {
-            return res.status(401).json({ error: 'Invalid credentials' });
-        }
-        const { password: _, ...user } = row;
-        res.json(user);
-    });
+    try {
+        const db = getDB();
+        db.get("SELECT * FROM users WHERE email = ?", [email], async (err, row) => {
+            if (err) {
+                return res.status(500).json({ error: err.message });
+            }
+            if (!row) {
+                return res.status(401).json({ error: 'Invalid credentials' });
+            }
+
+            // Handle Google auth users (they have 'GOOGLE_AUTH' as password)
+            if (row.password === 'GOOGLE_AUTH') {
+                return res.status(401).json({ error: 'Please use Google Sign-In for this account' });
+            }
+
+            // Compare the provided password with the hashed password
+            const isMatch = await comparePassword(password, row.password);
+            if (!isMatch) {
+                return res.status(401).json({ error: 'Invalid credentials' });
+            }
+
+            // Remove password from response
+            const { password: _, ...user } = row;
+            res.json(user);
+        });
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({ error: 'Server error during login' });
+    }
 });
 
 module.exports = router;
