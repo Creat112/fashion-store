@@ -125,7 +125,6 @@
 .color-btn.active {
     border-color: #3498db;
     box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.3);
-    transform: scale(1.15);
 }
 
 .color-name {

@@ -40,60 +40,84 @@ router.post('/', (req, res) => {
         return res.status(400).json({ error: 'ProductId and UserId required' });
     }
 
-    if (!colorId) {
-        return res.status(400).json({ error: 'ColorId is required. Please select a color.' });
-    }
-
     const db = getDB();
     const addedAt = new Date().toISOString();
 
     // CRITICAL: Validate stock before adding to cart
-    db.get("SELECT stock FROM product_colors WHERE id = ?", [colorId], (err, colorRow) => {
-        if (err) return res.status(500).json({ error: err.message });
+    if (colorId) {
+        // Validate color-specific stock
+        db.get("SELECT stock FROM product_colors WHERE id = ?", [colorId], (err, colorRow) => {
+            if (err) return res.status(500).json({ error: err.message });
 
-        if (!colorRow) {
-            return res.status(404).json({ error: 'Color variant not found' });
-        }
+            if (!colorRow) {
+                return res.status(404).json({ error: 'Color variant not found' });
+            }
 
+            const requestedQty = quantity || 1;
+
+            // Check if item exists for this user with same color
+            db.get("SELECT * FROM cart WHERE userId = ? AND productId = ? AND colorId = ?", [userId, productId, colorId], (err, row) => {
+                if (err) return res.status(500).json({ error: err.message });
+
+                if (row) {
+                    // Update quantity - validate total against stock
+                    const newQty = row.quantity + requestedQty;
+
+                    if (newQty > colorRow.stock) {
+                        return res.status(400).json({
+                            error: `Insufficient stock. Only ${colorRow.stock} available, you're trying to add ${newQty} total.`,
+                            availableStock: colorRow.stock
+                        });
+                    }
+
+                    db.run("UPDATE cart SET quantity = ? WHERE id = ?", [newQty, row.id], (err) => {
+                        if (err) return res.status(500).json({ error: err.message });
+                        res.json({ success: true, message: 'Cart updated' });
+                    });
+                } else {
+                    // Insert new - validate against stock
+                    if (requestedQty > colorRow.stock) {
+                        return res.status(400).json({
+                            error: `Insufficient stock. Only ${colorRow.stock} available.`,
+                            availableStock: colorRow.stock
+                        });
+                    }
+
+                    const stmt = db.prepare("INSERT INTO cart (userId, productId, quantity, colorId, addedAt) VALUES (?, ?, ?, ?, ?)");
+                    stmt.run(userId, productId, requestedQty, colorId, addedAt, (err) => {
+                        if (err) return res.status(500).json({ error: err.message });
+                        res.json({ success: true, message: 'Item added to cart' });
+                    });
+                    stmt.finalize();
+                }
+            });
+        });
+    } else {
+        // Add without color validation
         const requestedQty = quantity || 1;
-
-        // Check if item exists for this user with same color
-        db.get("SELECT * FROM cart WHERE userId = ? AND productId = ? AND colorId = ?", [userId, productId, colorId], (err, row) => {
+        
+        // Check if item exists for this user without color
+        db.get("SELECT * FROM cart WHERE userId = ? AND productId = ? AND colorId IS NULL", [userId, productId], (err, row) => {
             if (err) return res.status(500).json({ error: err.message });
 
             if (row) {
-                // Update quantity - validate total against stock
+                // Update quantity
                 const newQty = row.quantity + requestedQty;
-
-                if (newQty > colorRow.stock) {
-                    return res.status(400).json({
-                        error: `Insufficient stock. Only ${colorRow.stock} available, you're trying to add ${newQty} total.`,
-                        availableStock: colorRow.stock
-                    });
-                }
-
                 db.run("UPDATE cart SET quantity = ? WHERE id = ?", [newQty, row.id], (err) => {
                     if (err) return res.status(500).json({ error: err.message });
                     res.json({ success: true, message: 'Cart updated' });
                 });
             } else {
-                // Insert new - validate against stock
-                if (requestedQty > colorRow.stock) {
-                    return res.status(400).json({
-                        error: `Insufficient stock. Only ${colorRow.stock} available.`,
-                        availableStock: colorRow.stock
-                    });
-                }
-
+                // Insert new
                 const stmt = db.prepare("INSERT INTO cart (userId, productId, quantity, colorId, addedAt) VALUES (?, ?, ?, ?, ?)");
-                stmt.run(userId, productId, requestedQty, colorId, addedAt, (err) => {
+                stmt.run(userId, productId, requestedQty, null, addedAt, (err) => {
                     if (err) return res.status(500).json({ error: err.message });
                     res.json({ success: true, message: 'Item added to cart' });
                 });
                 stmt.finalize();
             }
         });
-    });
+    }
 });
 
 // Update cart item with stock validation

@@ -13,10 +13,6 @@ export const addToCart = async (productId, quantity = 1, colorId = null) => {
         return;
     }
 
-    if (!colorId) {
-        throw new Error('Please select a color before adding to cart');
-    }
-
     try {
         await api.post('/cart', { productId, quantity, userId, colorId });
         await updateCartCount();

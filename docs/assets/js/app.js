@@ -91,8 +91,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.addEventListener('click', (e) => {
             if (e.target.closest('.add-to-cart')) {
                 e.preventDefault();
+                e.stopPropagation();
                 const btn = e.target.closest('.add-to-cart');
                 const productId = parseInt(btn.dataset.productId);
+                const colorId = btn.dataset.colorId; // Get color ID from button data
                 let quantity = 1;
                 const scope = btn.closest('div') || document;
                 const qtyInput = scope.querySelector('.quantity-input');
@@ -101,8 +103,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (!isNaN(q) && q > 0) quantity = q;
                 }
                 if (productId) {
-                    addToCart(productId, quantity).then(() => {
-                        // success
+                    addToCart(productId, quantity, colorId ? parseInt(colorId) : null).then(() => {
+                        // success - show notification
+                        showNotification('Item added to cart!');
+                    }).catch(error => {
+                        console.error('Add to cart error:', error);
+                        alert(error.message || 'Failed to add to cart');
                     });
                 }
             }
@@ -247,16 +253,24 @@ async function loadProducts(category = null, color = null, sortBy = null, search
 
                         ${hasColors ? `
                             <div class="color-preview">
-                                ${product.colors.slice(0, 5).map(color => `
+                                ${product.colors.slice(0, 5).map((color, index) => `
                                     <div 
-                                        class="color-dot" 
+                                        class="color-dot clickable" 
                                         style="background-color: ${color.colorCode}; ${color.colorCode === '#FFFFFF' || color.colorCode === '#ffffff' ? 'border-color: #999;' : ''}"
                                         title="${color.colorName}"
+                                        data-product-id="${product.id}"
+                                        data-color-id="${color.id}"
+                                        data-color-image="${color.image || product.image}"
+                                        onclick="changeProductImage(this, ${product.id})"
                                     ></div>
                                 `).join('')}
                                 ${product.colors.length > 5 ? `<span style="font-size: 0.85rem; color: #666;">+${product.colors.length - 5} more</span>` : ''}
                             </div>
                         ` : ''}
+
+                        <button class="btn add-to-cart" data-product-id="${product.id}" data-color-id="${hasColors ? product.colors[0].id : null}" ${totalStock === 0 ? 'disabled' : ''}>
+                            <i class="ri-shopping-cart-line"></i> Add to Cart
+                        </button>
                     </div>
                 </div>
             `;
@@ -543,3 +557,25 @@ function showNotification(message) {
         notification.remove();
     }, 3000);
 }
+
+// Change product image when color is clicked
+window.changeProductImage = function(colorDot, productId) {
+    event.stopPropagation();
+    
+    // Get the color image and color ID
+    const colorImage = colorDot.dataset.colorImage;
+    const colorId = colorDot.dataset.colorId;
+    
+    // Update product image
+    const productCard = colorDot.closest('.product-card');
+    const productImage = productCard.querySelector('.product-image-container img');
+    if (productImage && colorImage) {
+        productImage.src = colorImage;
+    }
+    
+    // Update add to cart button with selected color ID
+    const addToCartBtn = productCard.querySelector('.add-to-cart');
+    if (addToCartBtn && colorId) {
+        addToCartBtn.dataset.colorId = colorId;
+    }
+};
