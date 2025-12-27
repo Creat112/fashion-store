@@ -353,8 +353,6 @@ footer {
 
 .active {
     position: fixed;
-    top: 60px;
-    /* adjust if your nav is taller */
     left: 0;
     width: 100%;
     background: white;
