@@ -39,18 +39,40 @@
             </div>
 
             <div class="track-order-form">
+                <div class="search-type-toggle">
+                    <button type="button" class="toggle-btn active" data-type="order">
+                        <i class="ri-file-list-3-line"></i>
+                        Search by Order ID
+                    </button>
+                    <button type="button" class="toggle-btn" data-type="phone">
+                        <i class="ri-phone-line"></i>
+                        Search by Phone
+                    </button>
+                </div>
+                
                 <form id="track-order-form">
-                    <div class="form-group">
+                    <div class="form-group" id="order-id-group">
                         <label for="order-id">Order ID</label>
                         <input 
                             type="text" 
                             id="order-id" 
                             name="orderId" 
                             placeholder="Enter your order ID (e.g., ORD-123456)"
-                            required> </div>
+                            required> 
+                    </div>
+                    
+                    <div class="form-group" id="phone-group" style="display: none;">
+                        <label for="phone">Phone Number</label>
+                        <input 
+                            type="tel" 
+                            id="phone" 
+                            name="phone" 
+                            placeholder="Enter your phone number">
+                    </div>
+                    
                     <button type="submit" class="btn btn-primary">
                         <i class="ri-search-line"></i>
-                        Track Order
+                        <span id="search-btn-text">Track Order</span>
                     </button>
                 </form>
             </div>

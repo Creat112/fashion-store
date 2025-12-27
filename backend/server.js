@@ -33,6 +33,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', require('./routes/orders'));
+console.log('Phone search route loading...');
+app.use('/api/orders', require('./routes/order-phone'));
+console.log('Phone search route loaded');
 app.use('/api/payment', paymentRoutes);
 
 console.log('API routes registered');

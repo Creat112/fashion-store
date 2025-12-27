@@ -11,116 +11,7 @@ class OrderTracker {
 
     init() {
         this.form.addEventListener('submit', (e) => this.handleSubmit(e));
-        
-        // Sample order data for demonstration
-        this.sampleOrders = {
-            'ORD-123456': {
-                id: 'ORD-123456',
-                date: '2024-12-20',
-                status: 'shipped',
-                estimatedDelivery: '2024-12-28',
-                items: [
-                    {
-                        name: 'SAVX Black Set',
-                        variant: 'Size: M, Color: Black',
-                        price: 89.99,
-                        image: 'products/Set/Sets Savax Black.jpeg'
-                    },
-                    {
-                        name: 'SAVX White T-Shirt',
-                        variant: 'Size: L, Color: White',
-                        price: 39.99,
-                        image: 'products/T-shirt/T-shirt savax white.jpeg'
-                    }
-                ],
-                subtotal: 129.98,
-                shipping: 9.99,
-                tax: 10.40,
-                total: 150.37,
-                timeline: [
-                    {
-                        title: 'Order Placed',
-                        date: 'December 20, 2024 - 2:30 PM',
-                        completed: true,
-                        icon: 'ri-shopping-cart-line'
-                    },
-                    {
-                        title: 'Payment Confirmed',
-                        date: 'December 20, 2024 - 2:32 PM',
-                        completed: true,
-                        icon: 'ri-bank-card-line'
-                    },
-                    {
-                        title: 'Order Processed',
-                        date: 'December 21, 2024 - 10:00 AM',
-                        completed: true,
-                        icon: 'ri-settings-3-line'
-                    },
-                    {
-                        title: 'Shipped',
-                        date: 'December 22, 2024 - 3:15 PM',
-                        completed: true,
-                        icon: 'ri-truck-line'
-                    },
-                    {
-                        title: 'Delivered',
-                        date: 'Estimated: December 28, 2024',
-                        completed: false,
-                        icon: 'ri-home-smile-line'
-                    }
-                ]
-            },
-            'ORD-789012': {
-                id: 'ORD-789012',
-                date: '2024-12-25',
-                status: 'processing',
-                estimatedDelivery: '2025-01-02',
-                items: [
-                    {
-                        name: 'SAVX Premium Hoodie',
-                        variant: 'Size: XL, Color: Gray',
-                        price: 79.99,
-                        image: 'products/Hoodie/Hoodie savax gray.jpeg'
-                    }
-                ],
-                subtotal: 79.99,
-                shipping: 9.99,
-                tax: 7.20,
-                total: 97.18,
-                timeline: [
-                    {
-                        title: 'Order Placed',
-                        date: 'December 25, 2024 - 11:45 AM',
-                        completed: true,
-                        icon: 'ri-shopping-cart-line'
-                    },
-                    {
-                        title: 'Payment Confirmed',
-                        date: 'December 25, 2024 - 11:47 AM',
-                        completed: true,
-                        icon: 'ri-bank-card-line'
-                    },
-                    {
-                        title: 'Order Processed',
-                        date: 'December 26, 2024 - 9:00 AM',
-                        completed: false,
-                        icon: 'ri-settings-3-line'
-                    },
-                    {
-                        title: 'Shipped',
-                        date: 'Estimated: December 27, 2024',
-                        completed: false,
-                        icon: 'ri-truck-line'
-                    },
-                    {
-                        title: 'Delivered',
-                        date: 'Estimated: January 2, 2025',
-                        completed: false,
-                        icon: 'ri-home-smile-line'
-                    }
-                ]
-            }
-        };
+        this.initializeSearchToggle();
     }
 
     async handleSubmit(e) {
@@ -400,12 +291,189 @@ class OrderTracker {
     hideError() {
         this.errorMessage.style.display = 'none';
     }
+
+    initializeSearchToggle() {
+        const toggleBtns = document.querySelectorAll('.toggle-btn');
+        const orderIdGroup = document.getElementById('order-id-group');
+        const phoneGroup = document.getElementById('phone-group');
+        const orderIdInput = document.getElementById('order-id');
+        const phoneInput = document.getElementById('phone');
+        const searchBtnText = document.getElementById('search-btn-text');
+        const sectionHeader = document.querySelector('.section-header p');
+
+        toggleBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active class from all buttons
+                toggleBtns.forEach(b => b.classList.remove('active'));
+                // Add active class to clicked button
+                btn.classList.add('active');
+
+                const searchType = btn.dataset.type;
+
+                if (searchType === 'order') {
+                    // Show order ID input, hide phone input
+                    orderIdGroup.style.display = 'block';
+                    phoneGroup.style.display = 'none';
+                    orderIdInput.setAttribute('required', '');
+                    phoneInput.removeAttribute('required');
+                    searchBtnText.textContent = 'Track Order';
+                    sectionHeader.textContent = 'Enter your order ID to check the status of your purchase';
+                } else {
+                    // Show phone input, hide order ID input
+                    orderIdGroup.style.display = 'none';
+                    phoneGroup.style.display = 'block';
+                    phoneInput.setAttribute('required', '');
+                    orderIdInput.removeAttribute('required');
+                    searchBtnText.textContent = 'Find Orders';
+                    sectionHeader.textContent = 'Enter your phone number to find your orders';
+                }
+            });
+        });
+    }
+
+    async handleSubmit(e) {
+        e.preventDefault();
+        
+        const activeToggle = document.querySelector('.toggle-btn.active');
+        const searchType = activeToggle.dataset.type;
+        
+        if (searchType === 'order') {
+            const orderId = document.getElementById('order-id').value.trim();
+            if (!orderId) return;
+            await this.trackOrder(orderId);
+        } else {
+            const phone = document.getElementById('phone').value.trim();
+            if (!phone) return;
+            await this.trackByPhone(phone);
+        }
+    }
+
+    async trackByPhone(phone) {
+        console.log('=== FRONTEND PHONE SEARCH DEBUG ===');
+        console.log('Searching for phone:', phone);
+        
+        this.showLoading();
+        this.hideError();
+
+        try {
+            const url = `/api/orders/phone/${phone}`;
+            console.log('Fetching URL:', url);
+            
+            const response = await fetch(url);
+            console.log('Response status:', response.status);
+            console.log('Response ok:', response.ok);
+            
+            if (!response.ok) {
+                if (response.status === 404) {
+                    this.showError(`No orders found for phone number: ${phone}`);
+                } else {
+                    this.showError(`Server error: ${response.status}`);
+                }
+                return;
+            }
+
+            const orders = await response.json();
+            console.log('Orders received:', orders);
+            console.log('Orders length:', orders.length);
+            
+            if (orders.length === 0) {
+                this.showError(`No orders found for phone number: ${phone}`);
+                return;
+            }
+
+            if (orders.length === 1) {
+                // Show single order
+                this.displayOrder(orders[0]);
+            } else {
+                // Show multiple orders list
+                this.displayOrderList(orders, phone);
+            }
+        } catch (error) {
+            console.error('Error tracking by phone:', error);
+            this.showError('Failed to track order. Please try again.');
+        } finally {
+            this.hideLoading();
+        }
+    }
+
+    displayOrderList(orders, phone) {
+        const orderListHTML = `
+            <div class="order-list">
+                <h3>Orders found for ${phone}</h3>
+                <div class="order-numbers-list">
+                    ${orders.map(order => `
+                        <div class="order-number-item" onclick="window.orderTracker.copyOrderNumber('${order.orderNumber}')">
+                            <span class="order-number">${order.orderNumber}</span>
+                            <span class="order-status status-${order.status}">${order.status}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+        
+        this.orderResult.innerHTML = orderListHTML;
+        this.orderResult.style.display = 'block';
+    }
+
+    copyOrderNumber(orderNumber) {
+        // Copy to clipboard
+        navigator.clipboard.writeText(orderNumber).then(() => {
+            // Show success message
+            this.showSuccessMessage(`Order number ${orderNumber} copied to clipboard!`);
+        }).catch(err => {
+            console.error('Failed to copy order number:', err);
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = orderNumber;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            this.showSuccessMessage(`Order number ${orderNumber} copied to clipboard!`);
+        });
+    }
+
+    showSuccessMessage(message) {
+        // Create temporary success message
+        const successDiv = document.createElement('div');
+        successDiv.className = 'success-message';
+        successDiv.innerHTML = `
+            <i class="ri-check-line"></i>
+            <p>${message}</p>
+        `;
+        successDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            animation: slideIn 0.3s ease;
+        `;
+        
+        document.body.appendChild(successDiv);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+            successDiv.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => {
+                if (successDiv.parentNode) {
+                    successDiv.parentNode.removeChild(successDiv);
+                }
+            }, 300);
+        }, 3000);
+    }
 }
 
-// Initialize when DOM is loaded
-let orderTracker;
+// Initialize the tracker when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    orderTracker = new OrderTracker();
+    window.orderTracker = new OrderTracker();
 });
 
 // Mobile menu functionality (reuse from main app)
