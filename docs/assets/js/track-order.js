@@ -97,6 +97,12 @@ class OrderTracker {
             <div class="order-status">
                 <h3>Order Status</h3>
                 <span class="status-badge status-${order.status}">${order.status}</span>
+                <div class="payment-method">
+                    <strong>Payment Method:</strong> 
+                    <span class="payment-badge payment-${order.paymentMethod || 'cash'}">
+                        ${order.paymentMethod === 'paymob' ? 'Visa/Card' : 'Cash on Delivery'}
+                    </span>
+                </div>
                 ${order.trackingNumber ? `<p>Tracking Number: ${order.trackingNumber}</p>` : ''}
                 ${order.estimatedDelivery ? `<p>Estimated Delivery: ${new Date(order.estimatedDelivery).toLocaleDateString('en-US', { 
                     year: 'numeric', 
@@ -293,49 +299,42 @@ class OrderTracker {
     }
 
     initializeSearchToggle() {
-        const toggleBtns = document.querySelectorAll('.toggle-btn');
-        const orderIdGroup = document.getElementById('order-id-group');
-        const phoneGroup = document.getElementById('phone-group');
+        const orderSearchBtn = document.getElementById('order-search-btn');
+        const phoneSearchBtn = document.getElementById('phone-search-btn');
+        const orderSearchSection = document.getElementById('order-search-section');
+        const phoneSearchSection = document.getElementById('phone-search-section');
         const orderIdInput = document.getElementById('order-id');
         const phoneInput = document.getElementById('phone');
         const searchBtnText = document.getElementById('search-btn-text');
         const sectionHeader = document.querySelector('.section-header p');
 
-        toggleBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                // Remove active class from all buttons
-                toggleBtns.forEach(b => b.classList.remove('active'));
-                // Add active class to clicked button
-                btn.classList.add('active');
+        // Order search button click - switch to phone search
+        orderSearchBtn.addEventListener('click', () => {
+            orderSearchSection.style.display = 'none';
+            phoneSearchSection.style.display = 'block';
+            orderIdInput.removeAttribute('required');
+            phoneInput.setAttribute('required', '');
+            searchBtnText.textContent = 'Find Orders';
+            sectionHeader.textContent = 'Enter your phone number to find your orders';
+        });
 
-                const searchType = btn.dataset.type;
-
-                if (searchType === 'order') {
-                    // Show order ID input, hide phone input
-                    orderIdGroup.style.display = 'block';
-                    phoneGroup.style.display = 'none';
-                    orderIdInput.setAttribute('required', '');
-                    phoneInput.removeAttribute('required');
-                    searchBtnText.textContent = 'Track Order';
-                    sectionHeader.textContent = 'Enter your order ID to check the status of your purchase';
-                } else {
-                    // Show phone input, hide order ID input
-                    orderIdGroup.style.display = 'none';
-                    phoneGroup.style.display = 'block';
-                    phoneInput.setAttribute('required', '');
-                    orderIdInput.removeAttribute('required');
-                    searchBtnText.textContent = 'Find Orders';
-                    sectionHeader.textContent = 'Enter your phone number to find your orders';
-                }
-            });
+        // Phone search button click - switch to order search
+        phoneSearchBtn.addEventListener('click', () => {
+            orderSearchSection.style.display = 'block';
+            phoneSearchSection.style.display = 'none';
+            orderIdInput.setAttribute('required', '');
+            phoneInput.removeAttribute('required');
+            searchBtnText.textContent = 'Track Order';
+            sectionHeader.textContent = 'Enter your order ID to check the status of your purchase';
         });
     }
 
     async handleSubmit(e) {
         e.preventDefault();
         
-        const activeToggle = document.querySelector('.toggle-btn.active');
-        const searchType = activeToggle.dataset.type;
+        // Check which input is visible to determine search type
+        const orderSearchSection = document.getElementById('order-search-section');
+        const searchType = orderSearchSection.style.display !== 'none' ? 'order' : 'phone';
         
         if (searchType === 'order') {
             const orderId = document.getElementById('order-id').value.trim();

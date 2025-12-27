@@ -25,6 +25,7 @@ router.get('/', (req, res) => {
                     total: row.total,
                     status: row.status,
                     date: row.date,
+                    paymentMethod: row.payment_method,
                     customer: {
                         fullName: row.customerName,
                         email: row.customerEmail,

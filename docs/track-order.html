@@ -39,19 +39,20 @@
             </div>
 
             <div class="track-order-form">
-                <div class="search-type-toggle">
-                    <button type="button" class="toggle-btn active" data-type="order">
-                        <i class="ri-file-list-3-line"></i>
-                        Search by Order ID
-                    </button>
-                    <button type="button" class="toggle-btn" data-type="phone">
+                <div class="search-toggle-container">
+                    <button type="button" id="order-search-btn" class="search-toggle-btn">
                         <i class="ri-phone-line"></i>
                         Search by Phone
+                       
+                    </button>
+                    <button type="button" id="phone-search-btn" class="search-toggle-btn">
+                         <i class="ri-file-list-3-line"></i>
+                         Search by Order ID
                     </button>
                 </div>
                 
                 <form id="track-order-form">
-                    <div class="form-group" id="order-id-group">
+                    <div class="form-group" id="order-search-section">
                         <label for="order-id">Order ID</label>
                         <input 
                             type="text" 
@@ -61,7 +62,7 @@
                             required> 
                     </div>
                     
-                    <div class="form-group" id="phone-group" style="display: none;">
+                    <div class="form-group" id="phone-search-section" style="display: none;">
                         <label for="phone">Phone Number</label>
                         <input 
                             type="tel" 
