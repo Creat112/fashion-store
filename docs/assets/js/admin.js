@@ -646,6 +646,9 @@ async function renderOrders() {
                     <span class="status-badge ${statusBadgeClass}">
                         ${o.status || 'pending'}
                     </span>
+                    <span class="payment-badge payment-${o.paymentMethod || 'cash'}">
+                        ${o.paymentMethod === 'paymob' ? 'Visa' : 'Cash'}
+                    </span>
                 </div>
                 <div class="small-muted">${o.customer?.fullName || '—'} — ${o.shipping?.address || ''}</div>
                 <div class="order-items">

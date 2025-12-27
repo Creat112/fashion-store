@@ -155,6 +155,29 @@ body {
   color: white;
 }
 
+/* Payment method styles */
+.payment-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-left: 8px;
+  text-transform: uppercase;
+}
+
+.payment-cash {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
+
+.payment-paymob {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
 .row.status-pending {
   border-left: 4px solid #ff9800;
 }
