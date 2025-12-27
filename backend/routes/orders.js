@@ -59,7 +59,7 @@ const { sendOrderEmail, sendCustomerOrderEmail, sendOrderStatusUpdateEmail, send
 
 // Create new order with stock validation
 router.post('/', (req, res) => {
-    const { customer, shipping, items, total, orderNumber, date } = req.body;
+    const { customer, shipping, items, total, orderNumber, date, paymentMethod = 'cash' } = req.body;
 
     if (!items || items.length === 0) {
         return res.status(400).json({ error: 'No items in order' });
@@ -122,11 +122,11 @@ router.post('/', (req, res) => {
 
             // Proceed with order creation
             const stmt = db.prepare(`
-                INSERT INTO orders (orderNumber, total, status, date, customerName, customerEmail, customerPhone, shippingAddress, shippingCity, shippingGov, notes)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO orders (orderNumber, total, status, date, customerName, customerEmail, customerPhone, shippingAddress, shippingCity, shippingGov, notes, payment_method)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `);
 
-            stmt.run(orderNumber, total, 'pending', date, customer.fullName, customer.email, customer.phone, shipping.address, shipping.city, shipping.governorate, shipping.notes, function (err) {
+            stmt.run(orderNumber, total, 'pending', date, customer.fullName, customer.email, customer.phone, shipping.address, shipping.city, shipping.governorate, shipping.notes, paymentMethod, function (err) {
                 if (err) {
                     db.run('ROLLBACK');
                     return res.status(500).json({ error: err.message });
@@ -178,13 +178,14 @@ router.post('/', (req, res) => {
                                         console.log('=== SENDING EMAILS ===');
                                         console.log('Admin email will be sent to:', process.env.EMAIL_USER);
                                         console.log('Customer email will be sent to:', customer.email);
+                                        console.log('Payment method:', paymentMethod);
 
                                         // Send Email Notification (Async)
                                         console.log('Starting email sending process...');
-                                        console.log('Order data for emails:', { customer, shipping, items, total, orderNumber, date });
+                                        console.log('Order data for emails:', { customer, shipping, items, total, orderNumber, date, paymentMethod });
 
-                                        // Send emails asynchronously
-                                        sendOrderEmail({ customer, shipping, items, total, orderNumber, date })
+                                        // Send emails asynchronously for all payment methods
+                                        sendOrderEmail({ customer, shipping, items, total, orderNumber, date, paymentMethod })
                                             .then(success => {
                                                 if (success) console.log('Admin notified via email.');
                                                 else console.warn('Admin email notification failed.');
@@ -193,7 +194,7 @@ router.post('/', (req, res) => {
                                                 console.error('Admin email error:', error);
                                             });
 
-                                        sendCustomerOrderEmailWithTracking({ customer, shipping, items, total, orderNumber, date })
+                                        sendCustomerOrderEmailWithTracking({ customer, shipping, items, total, orderNumber, date, paymentMethod })
                                             .then(success => {
                                                 if (success) console.log('Customer notified via email with tracking link.');
                                                 else console.warn('Customer email notification failed.');

@@ -97,6 +97,7 @@ const sendCustomerOrderEmailWithTracking = async (orderData) => {
         }
 
         const trackingLink = `https://yourdomain.com/track-order.html?order=${orderData.orderNumber}`;
+        const paymentMethodDisplay = orderData.paymentMethod === 'paymob' ? 'Visa/Card' : 'Cash on Delivery';
         
         const htmlContent = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -107,6 +108,7 @@ const sendCustomerOrderEmailWithTracking = async (orderData) => {
                     <p style="margin: 5px 0;"><strong>Order ID:</strong> ${orderData.orderNumber}</p>
                     <p style="margin: 5px 0;"><strong>Total:</strong> <span style="color: #28a745;">EGP ${orderData.total.toFixed(2)}</span></p>
                     <p style="margin: 5px 0;"><strong>Date:</strong> ${new Date(orderData.date).toLocaleString()}</p>
+                    <p style="margin: 5px 0;"><strong>Payment Method:</strong> <span style="color: ${orderData.paymentMethod === 'paymob' ? '#28a745' : '#ffc107'}; font-weight: bold;">${paymentMethodDisplay}</span></p>
                 </div>
                 
                 <div style="background: #e7f3ff; padding: 15px; border-radius: 5px; margin-bottom: 20px; text-align: center;">
@@ -162,6 +164,9 @@ const buildOrderEmailHtml = (orderData, headingText) => {
             </tr>
         `).join('');
 
+    const paymentMethodDisplay = orderData.paymentMethod === 'paymob' ? 'Visa/Card' : 'Cash on Delivery';
+    const paymentMethodColor = orderData.paymentMethod === 'paymob' ? '#28a745' : '#ffc107';
+
     return `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                 <h1 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">${headingText}</h1>
@@ -170,6 +175,7 @@ const buildOrderEmailHtml = (orderData, headingText) => {
                     <p style="margin: 5px 0;"><strong>Order Number:</strong> ${orderData.orderNumber}</p>
                     <p style="margin: 5px 0;"><strong>Date:</strong> ${new Date(orderData.date).toLocaleString()}</p>
                     <p style="margin: 5px 0;"><strong>Total:</strong> <span style="color: #28a745; font-size: 18px;">EGP ${orderData.total.toFixed(2)}</span></p>
+                    <p style="margin: 5px 0;"><strong>Payment Method:</strong> <span style="color: ${paymentMethodColor}; font-weight: bold;">${paymentMethodDisplay}</span></p>
                 </div>
                 
                 <h3 style="color: #333;">Customer Information:</h3>

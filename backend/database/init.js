@@ -116,10 +116,10 @@ const createTables = () => {
         // Orders Table
         db.run(`CREATE TABLE IF NOT EXISTS orders (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            orderNumber TEXT UNIQUE,
-            total REAL,
+            orderNumber TEXT UNIQUE NOT NULL,
+            total REAL NOT NULL,
             status TEXT DEFAULT 'pending',
-            date TEXT,
+            date TEXT NOT NULL,
             customerName TEXT,
             customerEmail TEXT,
             customerPhone TEXT,
@@ -127,16 +127,30 @@ const createTables = () => {
             shippingCity TEXT,
             shippingGov TEXT,
             notes TEXT,
-            trackingNumber TEXT,
-            estimatedDelivery TEXT,
-            shippedDate TEXT,
-            deliveredDate TEXT
+            payment_method TEXT DEFAULT 'cash',
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP
         )`, (err) => {
             if (!err) {
-                // Add tracking columns if they don't exist (migration)
-                db.run("ALTER TABLE orders ADD COLUMN trackingNumber TEXT", (err) => {
+                // Add new columns if they don't exist (migration)
+                db.run("ALTER TABLE orders ADD COLUMN payment_method TEXT DEFAULT 'cash'", (err) => {
                     if (err && !err.message.includes("duplicate column name")) {
-                        console.error("Error adding trackingNumber column:", err.message);
+                        console.error("Error adding payment_method column:", err.message);
+                    }
+                });
+                db.run("ALTER TABLE orders ADD COLUMN created_at TEXT DEFAULT CURRENT_TIMESTAMP", (err) => {
+                    if (err && !err.message.includes("duplicate column name")) {
+                        console.error("Error adding created_at column:", err.message);
+                    }
+                });
+                db.run("ALTER TABLE orders ADD COLUMN updated_at TEXT DEFAULT CURRENT_TIMESTAMP", (err) => {
+                    if (err && !err.message.includes("duplicate column name")) {
+                        console.error("Error adding updated_at column:", err.message);
+                    }
+                });
+                db.run("ALTER TABLE orders ADD COLUMN shippedDate TEXT", (err) => {
+                    if (err && !err.message.includes("duplicate column name")) {
+                        console.error("Error adding shippedDate column:", err.message);
                     }
                 });
                 db.run("ALTER TABLE orders ADD COLUMN estimatedDelivery TEXT", (err) => {
