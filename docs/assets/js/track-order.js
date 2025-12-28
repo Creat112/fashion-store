@@ -380,13 +380,8 @@ class OrderTracker {
                 return;
             }
 
-            if (orders.length === 1) {
-                // Show single order
-                this.displayOrder(orders[0]);
-            } else {
-                // Show multiple orders list
-                this.displayOrderList(orders, phone);
-            }
+            // Always show order list for phone search (even for single orders)
+            this.displayOrderList(orders, phone);
         } catch (error) {
             console.error('Error tracking by phone:', error);
             this.showError('Failed to track order. Please try again.');
