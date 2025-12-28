@@ -192,11 +192,13 @@ function addColorRow(data = null) {
             <input class="c-price" type="number" placeholder="Price" value="${data ? data.price : ''}" required style="width:100%;">
         </div>
         <div style="display:flex; flex-direction:column; gap:4px; align-items:center;">
-             <input class="c-code" type="color" value="${data ? data.colorCode : '#000000'}" style="width: 40px; padding: 0;">
-             <label style="font-size:10px; cursor:pointer; color: #94a3b8;">
-                Avatar
-                <input class="c-image" type="file" accept="image/*" style="display:none;">
-             </label>
+             <input class="c-code" type="color" value="${data ? data.colorCode : '#000000'}" style="width: 40px; padding: 0; cursor: pointer;">
+             <div style="position:relative;">
+                <input class="c-image" type="file" accept="image/*" style="display:none;" id="file-${data ? data.id : Date.now()}">
+                <label for="file-${data ? data.id : Date.now()}" class="btn-small" style="padding:4px 8px; font-size:16px; display:flex; align-items:center; justify-content:center; cursor:pointer;" title="Upload Variant Image">
+                    <i class="ri-image-add-line"></i>
+                </label>
+             </div>
         </div>
         <div style="width:60px;">
             <input class="c-stock" type="number" placeholder="Qty" value="${data ? data.stock : 0}" required style="width: 100%;">
