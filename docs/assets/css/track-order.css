@@ -555,28 +555,28 @@
     }
 }
             
-            .toggle-btn i {
+.toggle-btn i {
                 font-size: 1rem;
-            }
+}
         
         
-        .order-list {
+.order-list {
             margin-top: 2rem;
-        }
+}
         
-        .order-list h3 {
+.order-list h3 {
             color: #333;
             margin-bottom: 1.5rem;
             text-align: center;
-        }
+}
         
-        .orders-grid {
+.orders-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 1.5rem;
-        }
+}
         
-        .order-card {
+.order-card {
             background: white;
             border: 1px solid #e0e0e0;
             border-radius: 12px;
@@ -584,54 +584,54 @@
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
+}
         
-        .order-card:hover {
+.order-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-        }
+}
         
-        .order-card-header {
+.order-card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 1rem;
             background: #f8f9fa;
             border-bottom: 1px solid #e0e0e0;
-        }
+}
         
-        .order-number {
+.order-number {
             font-weight: bold;
             color: #333;
-        }
+}
         
-        .order-status {
+.order-status {
             padding: 0.25rem 0.75rem;
             border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 500;
             text-transform: uppercase;
-        }
+}
         
-        .status-pending { background: #fff3cd; color: #856404; }
-        .status-processing { background: #cce5ff; color: #004085; }
-        .status-shipped { background: #d4edda; color: #155724; }
-        .status-delivered { background: #d1ecf1; color: #0c5460; }
+.status-pending { background: #fff3cd; color: #856404; }
+.status-processing { background: #cce5ff; color: #004085; }
+.status-shipped { background: #d4edda; color: #155724; }
+.status-delivered { background: #d1ecf1; color: #0c5460; }
         
-        .order-card-body {
+.order-card-body {
             padding: 1rem;
-        }
+}
         
-        .order-card-body p {
+.order-card-body p {
             margin: 0.5rem 0;
             color: #666;
-        }
+}
         
-        .order-date {
+.order-date {
             font-size: 0.9rem;
-        }
+}
         
-        .order-total {
+.order-total {
             font-weight: bold;
             color: #333;
             font-size: 1.1rem;
