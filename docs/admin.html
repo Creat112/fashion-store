@@ -2,100 +2,190 @@
 <html lang="en">
 
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Admin Dashboard - SAVX</title>
-  <link rel="stylesheet" href="assets/css/admin.css?v=176648">
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAVX Admin | Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/admin.css">
 </head>
 
 <body>
-  <div class="admin-app">
+
+  <div class="admin-wrapper">
+    <!-- Glassmorphism Sidebar -->
     <aside class="sidebar">
-      <div class="brand">SAVX Admin</div>
-      <nav>
-        <ul>
-          <li class="nav-item active" data-tab="products">Products</li>
-          <li class="nav-item" data-tab="orders">Orders</li>
-          <li class="nav-item" data-tab="stats">Analytics</li>
-        </ul>
+      <div class="logo-area">
+        <h2>SAVX</h2>
+      </div>
+
+      <nav class="nav-menu">
+        <a href="#" class="nav-item active" data-tab="stats">
+          <i class="ri-dashboard-line"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="#" class="nav-item" data-tab="products">
+          <i class="ri-t-shirt-line"></i>
+          <span>Products</span>
+        </a>
+        <a href="#" class="nav-item" data-tab="orders">
+          <i class="ri-shopping-bag-3-line"></i>
+          <span>Orders</span>
+        </a>
       </nav>
 
       <div class="sidebar-footer">
-        <button id="logoutBtn" class="btn">Logout</button>
-        <button id="theme-toggle" class="btn">Switch theme</button>
-        <button id="export-orders" class="btn">Export Orders CSV</button>
+        <button id="logoutBtn" class="nav-item logout">
+          <i class="ri-logout-box-line"></i>
+          <span>Logout</span>
+        </button>
       </div>
     </aside>
 
-    <main class="main">
-      <!-- Products Tab -->
-      <section id="tab-products" class="tab active">
-        <h1>Products</h1>
-
-        <div class="panel">
-          <form id="product-form" class="product-form">
-            <h3 id="product-form-title">Add Product</h3>
-            <input type="hidden" id="product-id">
-
-            <label> Name <input id="p-name" required></label>
-            <label> Base Price <input id="p-price" type="number" step="0.01" required></label>
-
-            <div class="discount-section">
-              <label> Discount (%) <input id="p-discount" type="number" min="0" max="100" step="0.1" value="0"></label>
-              <label> Original Price (auto-calculated) <input id="p-original-price" type="number" step="0.01"
-                  readonly></label>
-            </div>
-
-            <label> Stock (total) <input id="p-stock" type="number" value="0" readonly></label>
-            <label> Category <input id="p-category"></label>
-            <label> Image <input id="p-image" type="file" accept="image/*"></label>
-            <label> Description <textarea id="p-desc"></textarea></label>
-
-            <div class="colors-section">
-              <h4>Color Variants</h4>
-              <div id="colors-container"></div>
-              <button type="button" id="add-color-btn" class="btn">+ Add Color</button>
-            </div>
-
-            <div class="form-actions">
-              <button type="submit" class="btn primary">Save</button>
-              <button type="button" id="product-cancel" class="btn">Cancel</button>
-            </div>
-          </form>
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Top Header -->
+      <header class="top-bar">
+        <div class="page-title">
+          <h1 id="page-header">Dashboard</h1>
         </div>
-
-        <div class="panel">
-          <h3>All Products</h3>
-          <div id="products-list" class="table"></div>
-        </div>
-      </section>
-
-      <!-- Orders Tab -->
-      <section id="tab-orders" class="tab">
-        <h1>Orders</h1>
-        <div class="panel">
-          <h3>Orders (latest first)</h3>
-          <div id="orders-list" class="table"></div>
-        </div>
-      </section>
-
-      <!-- Analytics Tab -->
-      <section id="tab-stats" class="tab">
-        <h1>Analytics</h1>
-        <div class="panel">
-          <h3>Last 30 days</h3>
-          <div id="stats-content">
-            <p>Total Revenue: <strong id="stat-revenue">$0.00</strong></p>
-            <p>Total Orders: <strong id="stat-orders">0</strong></p>
-            <p>Average Order Value: <strong id="stat-aov">$0.00</strong></p>
+        <div class="top-actions">
+          <div class="notification-btn">
+            <i class="ri-notification-3-line"></i>
+            <span class="badge-dot"></span>
+          </div>
+          <div class="profile-preview">
+            <div class="avatar">A</div>
+            <span>Admin</span>
           </div>
         </div>
-      </section>
+      </header>
+
+      <!-- Dynamic Views -->
+      <div class="dashboard-views">
+
+        <!-- VIEW 1: STATS -->
+        <div id="tab-stats" class="view-panel active">
+          <div class="stats-grid">
+            <div class="stat-card glass">
+              <div class="stat-icon revenue"><i class="ri-money-dollar-circle-line"></i></div>
+              <div class="stat-info">
+                <h3>Total Revenue</h3>
+                <p id="stat-revenue">$0.00</p>
+              </div>
+            </div>
+            <div class="stat-card glass">
+              <div class="stat-icon orders"><i class="ri-shopping-cart-2-line"></i></div>
+              <div class="stat-info">
+                <h3>Total Orders</h3>
+                <p id="stat-orders">0</p>
+              </div>
+            </div>
+            <div class="stat-card glass">
+              <div class="stat-icon aov"><i class="ri-bar-chart-grouped-line"></i></div>
+              <div class="stat-info">
+                <h3>Avg. Order Value</h3>
+                <p id="stat-aov">$0.00</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Activity (Could be orders) -->
+          <div class="recent-section glass mt-4">
+            <h2>Recent Activity</h2>
+            <div id="recent-activity-list"></div>
+          </div>
+        </div>
+
+        <!-- VIEW 2: PRODUCTS -->
+        <div id="tab-products" class="view-panel">
+          <div class="panel-header">
+            <h2>Product Inventory</h2>
+            <button id="btn-add-product" class="btn-primary">
+              <i class="ri-add-line"></i> Add Product
+            </button>
+          </div>
+          <div class="glass table-container">
+            <div id="products-list"></div>
+          </div>
+        </div>
+
+        <!-- VIEW 3: ORDERS -->
+        <div id="tab-orders" class="view-panel">
+          <div class="panel-header">
+            <h2>Order Management</h2>
+            <button id="export-orders" class="btn-secondary">
+              <i class="ri-download-line"></i> Export CSV
+            </button>
+          </div>
+          <div class="glass table-container">
+            <div id="orders-list"></div>
+          </div>
+        </div>
+
+      </div>
     </main>
   </div>
 
+  <!-- PRODUCT MODAL (Hidden by default) -->
+  <div id="product-modal" class="modal-overlay">
+    <div class="modal-glass">
+      <div class="modal-header">
+        <h2 id="modal-title">Add New Product</h2>
+        <button id="close-modal" class="close-btn"><i class="ri-close-line"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="product-form">
+          <input type="hidden" id="product-id">
 
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Product Name</label>
+              <input type="text" id="p-name" required placeholder="e.g. Urban Jacket">
+            </div>
+            <div class="form-group">
+              <label>Category</label>
+              <input type="text" id="p-category" placeholder="e.g. Winter Collection">
+            </div>
+            <div class="form-group">
+              <label>Price ($)</label>
+              <input type="number" id="p-price" step="0.01" required>
+            </div>
+            <div class="form-group">
+              <label>Discount (%)</label>
+              <input type="number" id="p-discount" step="0.1" min="0" max="100">
+            </div>
+            <div class="form-group">
+              <label>Original Price</label>
+              <input type="number" id="p-original-price" readonly class="readonly-input">
+            </div>
+            <div class="form-group" style="grid-column: span 2;">
+              <label>Product Image</label>
+              <input type="file" id="p-image" accept="image/*">
+            </div>
+          </div>
+
+          <div class="form-group mt-2">
+            <label>Description</label>
+            <textarea id="p-desc" rows="3"></textarea>
+          </div>
+
+          <div class="form-group mt-2">
+            <div class="flex-between">
+              <label>Color Variants</label>
+              <button type="button" id="add-color-btn" class="btn-small">+ Add Variant</button>
+            </div>
+            <div id="colors-container">
+              <!-- Color rows go here -->
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="submit" class="btn-primary full-width">Save Product</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 
   <script type="module" src="assets/js/admin.js"></script>
 </body>

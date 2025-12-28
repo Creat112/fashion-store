@@ -138,12 +138,12 @@ const createTables = () => {
                         console.error("Error adding payment_method column:", err.message);
                     }
                 });
-                db.run("ALTER TABLE orders ADD COLUMN created_at TEXT DEFAULT CURRENT_TIMESTAMP", (err) => {
+                db.run("ALTER TABLE orders ADD COLUMN created_at TEXT", (err) => {
                     if (err && !err.message.includes("duplicate column name")) {
                         console.error("Error adding created_at column:", err.message);
                     }
                 });
-                db.run("ALTER TABLE orders ADD COLUMN updated_at TEXT DEFAULT CURRENT_TIMESTAMP", (err) => {
+                db.run("ALTER TABLE orders ADD COLUMN updated_at TEXT", (err) => {
                     if (err && !err.message.includes("duplicate column name")) {
                         console.error("Error adding updated_at column:", err.message);
                     }
