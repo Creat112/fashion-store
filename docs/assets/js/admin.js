@@ -654,15 +654,15 @@ window.viewOrderDetails = async function (orderId) {
                 <h3 style="margin-bottom: 10px; color: #8b5cf6;">Order Items</h3>
                 <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px;">
                     ${order.items && order.items.length > 0 ? order.items.map(item => `
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <img src="${item.image || 'assets/images/placeholder.jpg'}" alt="${item.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
-                                <div>
-                                    <div style="font-weight: 500;">${item.name}</div>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <div style="display: flex; align-items: center; gap: 15px; flex: 1; min-width: 0;">
+                                <img src="${item.image || 'assets/images/placeholder.jpg'}" alt="${item.name}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px; flex-shrink: 0;">
+                                <div style="flex: 1; min-width: 0;">
+                                    <div style="font-weight: 500; word-wrap: break-word; overflow-wrap: break-word;">${item.name}</div>
                                     <div style="font-size: 12px; color: #94a3b8;">${item.colorName ? `Color: ${item.colorName}` : ''} | Qty: ${item.quantity}</div>
                                 </div>
                             </div>
-                            <div style="text-align: right;">
+                            <div style="text-align: right; flex-shrink: 0; margin-left: 15px;">
                                 <div style="font-weight: 500;">EGP ${(item.price * item.quantity).toFixed(2)}</div>
                                 <div style="font-size: 12px; color: #94a3b8;">EGP ${item.price.toFixed(2)} each</div>
                             </div>
