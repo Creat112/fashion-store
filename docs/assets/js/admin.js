@@ -367,7 +367,7 @@ async function loadProducts() {
                             </div>
                         </div>
                     </td>
-                    <td>EGP ${p.price.toFixed(2)}</td>
+                    <td>EGP ${Math.floor(p.price).toFixed(2)}</td>
                     <td>${p.stock}</td>
                     <td><span class="badge ${p.disabled ? 'cancelled' : 'delivered'}">${p.disabled ? 'Disabled' : 'Active'}</span></td>
                     <td>
@@ -462,7 +462,7 @@ async function loadOrders() {
                         <div>${o.customer?.fullName || 'Guest'}</div>
                         <div style="font-size:11px; color:#94a3b8;">${new Date(o.date).toLocaleDateString()}</div>
                     </td>
-                    <td>EGP ${(o.total || 0).toFixed(2)}</td>
+                    <td>EGP ${Math.floor(o.total || 0).toFixed(2)}</td>
                     <td>
                         <div style="display:flex; gap:5px; flex-wrap:wrap;">
                             <span class="badge ${o.status || 'pending'}">${o.status || 'Pending'}</span>
@@ -514,9 +514,9 @@ async function loadStats() {
     const totalOrders = last30.length;
     const aov = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
-    document.getElementById('stat-revenue').textContent = `EGP ${totalRevenue.toFixed(2)}`;
+    document.getElementById('stat-revenue').textContent = `EGP ${Math.floor(totalRevenue).toFixed(2)}`;
     document.getElementById('stat-orders').textContent = totalOrders;
-    document.getElementById('stat-aov').textContent = `EGP ${aov.toFixed(2)}`;
+    document.getElementById('stat-aov').textContent = `EGP ${Math.floor(aov).toFixed(2)}`;
 
     // Populate recent activity
     const activityList = document.getElementById('recent-activity-list');
@@ -532,7 +532,7 @@ async function loadStats() {
                         <div style="font-size:12px; color:#94a3b8;">by ${o.customer?.fullName || 'Guest'}</div>
                     </div>
                     <div style="text-align:right;">
-                        <div style="color: #10b981;">+EGP ${(o.total || 0).toFixed(2)}</div>
+                        <div style="color: #10b981;">+EGP ${Math.floor(o.total || 0).toFixed(2)}</div>
                         <div style="font-size:11px; color:#94a3b8;">${new Date(o.date).toLocaleTimeString()}</div>
                     </div>
                 </div>
@@ -633,7 +633,7 @@ window.viewOrderDetails = async function (orderId) {
                     <p><strong>Date:</strong> ${new Date(order.date).toLocaleString()}</p>
                     <p><strong>Status:</strong> <span class="badge ${order.status || 'pending'}">${order.status || 'Pending'}</span></p>
                     <p><strong>Payment Method:</strong> ${order.paymentMethod === 'paymob' ? 'VISA/Card' : 'Cash on Delivery'}</p>
-                    <p><strong>Total Amount:</strong> <strong style="color: #10b981;">EGP ${(order.total || 0).toFixed(2)}</strong></p>
+                    <p><strong>Total Amount:</strong> <strong style="color: #10b981;">EGP ${Math.floor(order.total || 0).toFixed(2)}</strong></p>
                 </div>
                 <div>
                     <h3 style="margin-bottom: 10px; color: #3b82f6;">Customer Information</h3>
@@ -656,15 +656,15 @@ window.viewOrderDetails = async function (orderId) {
                     ${order.items && order.items.length > 0 ? order.items.map(item => `
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
                             <div style="display: flex; align-items: center; gap: 15px; flex: 1; min-width: 0;">
-                                <img src="${item.image || 'assets/images/placeholder.jpg'}" alt="${item.name}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px; flex-shrink: 0;">
+                                <img src="${item.image ? (item.image.startsWith('http') || item.image.startsWith('/') ? item.image : '/' + item.image) : 'assets/images/placeholder.jpg'}" alt="${item.name}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px; flex-shrink: 0;">
                                 <div style="flex: 1; min-width: 0;">
                                     <div style="font-weight: 500; word-wrap: break-word; overflow-wrap: break-word;">${item.name}</div>
                                     <div style="font-size: 12px; color: #94a3b8;">${item.colorName ? `Color: ${item.colorName}` : ''} | Qty: ${item.quantity}</div>
                                 </div>
                             </div>
                             <div style="text-align: right; flex-shrink: 0; margin-left: 15px;">
-                                <div style="font-weight: 500;">EGP ${(item.price * item.quantity).toFixed(2)}</div>
-                                <div style="font-size: 12px; color: #94a3b8;">EGP ${item.price.toFixed(2)} each</div>
+                                <div style="font-weight: 500;">EGP ${Math.floor(item.price * item.quantity).toFixed(2)}</div>
+                                <div style="font-size: 12px; color: #94a3b8;">EGP ${Math.floor(item.price).toFixed(2)} each</div>
                             </div>
                         </div>
                     `).join('') : '<p>No items found</p>'}
