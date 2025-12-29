@@ -366,7 +366,7 @@ async function loadProducts() {
                             </div>
                         </div>
                     </td>
-                    <td>$${p.price.toFixed(2)}</td>
+                    <td>EGP ${p.price.toFixed(2)}</td>
                     <td>${p.stock}</td>
                     <td><span class="badge ${p.disabled ? 'cancelled' : 'delivered'}">${p.disabled ? 'Disabled' : 'Active'}</span></td>
                     <td>
@@ -461,7 +461,7 @@ async function loadOrders() {
                         <div>${o.customer?.fullName || 'Guest'}</div>
                         <div style="font-size:11px; color:#94a3b8;">${new Date(o.date).toLocaleDateString()}</div>
                     </td>
-                    <td>$${(o.total || 0).toFixed(2)}</td>
+                    <td>EGP ${(o.total || 0).toFixed(2)}</td>
                     <td>
                         <div style="display:flex; gap:5px; flex-wrap:wrap;">
                             <span class="badge ${o.status || 'pending'}">${o.status || 'Pending'}</span>
@@ -512,9 +512,9 @@ async function loadStats() {
     const totalOrders = last30.length;
     const aov = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
-    document.getElementById('stat-revenue').textContent = `$${totalRevenue.toFixed(2)}`;
+    document.getElementById('stat-revenue').textContent = `EGP ${totalRevenue.toFixed(2)}`;
     document.getElementById('stat-orders').textContent = totalOrders;
-    document.getElementById('stat-aov').textContent = `$${aov.toFixed(2)}`;
+    document.getElementById('stat-aov').textContent = `EGP ${aov.toFixed(2)}`;
 
     // Populate recent activity
     const activityList = document.getElementById('recent-activity-list');
@@ -530,7 +530,7 @@ async function loadStats() {
                         <div style="font-size:12px; color:#94a3b8;">by ${o.customer?.fullName || 'Guest'}</div>
                     </div>
                     <div style="text-align:right;">
-                        <div style="color: #10b981;">+$${(o.total || 0).toFixed(2)}</div>
+                        <div style="color: #10b981;">+EGP ${(o.total || 0).toFixed(2)}</div>
                         <div style="font-size:11px; color:#94a3b8;">${new Date(o.date).toLocaleTimeString()}</div>
                     </div>
                 </div>
