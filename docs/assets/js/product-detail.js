@@ -218,7 +218,7 @@ function updatePriceAndStock(price, stock) {
 
     // Update price
     const currentPriceEl = document.querySelector('.current-price');
-    currentPriceEl.textContent = `$${price.toFixed(2)}`;
+    currentPriceEl.textContent = `EGP ${price.toFixed(2)}`;
 
     // Update stock
     const stockStatus = document.getElementById('stock-status');

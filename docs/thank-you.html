@@ -106,7 +106,7 @@
             orderDetailsContainer.innerHTML = `
                 <p><strong>Order Number:</strong> ${currentOrder.orderNumber || 'N/A'}</p>
                 <p><strong>Date:</strong> ${new Date(currentOrder.date || Date.now()).toLocaleString()}</p>
-                <p><strong>Total:</strong> $${currentOrder.total?.toFixed(2) || '0.00'}</p>
+                <p><strong>Total:</strong> EGP ${currentOrder.total?.toFixed(2) || '0.00'}</p>
                 <p><strong>Customer Name:</strong> ${currentOrder.customer?.fullName || 'N/A'}</p>
                 <p><strong>Email:</strong> ${currentOrder.customer?.email || 'N/A'}</p>
                 <p><strong>Phone:</strong> ${currentOrder.customer?.phone || 'N/A'}</p>

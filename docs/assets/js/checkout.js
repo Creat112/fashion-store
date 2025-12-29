@@ -26,7 +26,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     if (checkoutItems.length === 0) {
         if (listContainer) listContainer.innerHTML = "<p>Your cart is empty.</p>";
-        if (totalSpan) totalSpan.textContent = "$0.00";
+        if (totalSpan) totalSpan.textContent = "EGP 0.00";
         return;
     }
 
@@ -65,7 +65,7 @@ window.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    if (totalSpan) totalSpan.textContent = `$${total.toFixed(2)}`;
+    if (totalSpan) totalSpan.textContent = `EGP ${total.toFixed(2)}`;
 
     // Location handling (existing code)
     // ... (keep existing location code)

@@ -299,8 +299,8 @@ async function renderCartPage() {
                     <p>Your cart is empty</p>
                     <a href="products.html" class="btn">Continue Shopping</a>
                 </div>`;
-            if (subtotalEl) subtotalEl.textContent = '$0.00';
-            if (totalEl) totalEl.textContent = '$0.00';
+            if (subtotalEl) subtotalEl.textContent = 'EGP 0.00';
+            if (totalEl) totalEl.textContent = 'EGP 0.00';
             return;
         }
 
@@ -327,19 +327,19 @@ async function renderCartPage() {
                 </div>
                 <div class="actions">
                      <button class="btn btn-outline remove-item" style="color: red; border-color: red;">Remove</button>
-                     <div class="line-total" style="font-weight: bold;">$${line.toFixed(2)}</div>
+                     <div class="line-total" style="font-weight: bold;">EGP ${line.toFixed(2)}</div>
                 </div>
             </div>`;
         }).join('');
 
         container.innerHTML = html;
-        if (subtotalEl) subtotalEl.textContent = `$${subtotal.toFixed(2)}`;
-        if (totalEl) totalEl.textContent = `$${subtotal.toFixed(2)}`;
+        if (subtotalEl) subtotalEl.textContent = `EGP ${subtotal.toFixed(2)}`;
+        if (totalEl) totalEl.textContent = `EGP ${subtotal.toFixed(2)}`;
 
         // Helper to update UI line total
         const updateLineTotal = (itemEl, price, qty) => {
             const lineTotal = itemEl.querySelector('.line-total');
-            lineTotal.textContent = `$${(price * qty).toFixed(2)}`;
+            lineTotal.textContent = `EGP ${(price * qty).toFixed(2)}`;
         };
 
         // Events
@@ -347,7 +347,7 @@ async function renderCartPage() {
             if (e.target.classList.contains('qty-input')) {
                 const itemEl = e.target.closest('.cart-item');
                 const id = itemEl.dataset.id; // cart item id
-                const price = parseFloat(itemEl.querySelector('.price').textContent.replace('$', ''));
+                const price = parseFloat(itemEl.querySelector('.price').textContent.replace('EGP', ''));
                 const qty = parseInt(e.target.value);
 
                 if (qty > 0) {

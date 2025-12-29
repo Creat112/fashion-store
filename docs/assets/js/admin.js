@@ -11,6 +11,7 @@ if (!currentUser || currentUser.role !== 'admin') {
 document.addEventListener('DOMContentLoaded', async () => {
     initDashboard();
     initModalLogic();
+    initOrderDetailsModal();
 
     // Logout
     const logoutBtn = document.getElementById('logoutBtn');
@@ -447,7 +448,7 @@ async function loadOrders() {
                             <th>Customer</th>
                             <th>Amount</th>
                             <th>Status/Method</th>
-                            <th>Update</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -469,6 +470,7 @@ async function loadOrders() {
                         </div>
                     </td>
                     <td>
+                        <button onclick="viewOrderDetails('${o.id}')" class="btn-small" style="margin-right:5px;">View Details</button>
                         <select onchange="changeOrderStatus('${o.id}', this.value)" style="background:transparent; color:#94a3b8; border:1px solid rgba(255,255,255,0.1); border-radius:4px; padding:4px;">
                             <option value="pending" ${o.status === 'pending' ? 'selected' : ''}>Pending</option>
                             <option value="processing" ${o.status === 'processing' ? 'selected' : ''}>Processing</option>
@@ -589,3 +591,89 @@ async function exportOrdersCSV() {
     a.click();
     URL.revokeObjectURL(url);
 }
+
+// ------ ORDER DETAILS MODAL ------
+function initOrderDetailsModal() {
+    const modal = document.getElementById('order-details-modal');
+    const closeBtn = document.getElementById('close-order-modal');
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+    }
+
+    // Close on outside click
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.remove('active');
+        });
+    }
+}
+
+window.viewOrderDetails = async function (orderId) {
+    try {
+        const orders = await getOrders();
+        const order = orders.find(o => o.id === orderId);
+        
+        if (!order) {
+            alert('Order not found');
+            return;
+        }
+
+        const modal = document.getElementById('order-details-modal');
+        const content = document.getElementById('order-details-content');
+
+        content.innerHTML = `
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div>
+                    <h3 style="margin-bottom: 10px; color: #10b981;">Order Information</h3>
+                    <p><strong>Order Number:</strong> ${order.orderNumber || '#' + order.id}</p>
+                    <p><strong>Date:</strong> ${new Date(order.date).toLocaleString()}</p>
+                    <p><strong>Status:</strong> <span class="badge ${order.status || 'pending'}">${order.status || 'Pending'}</span></p>
+                    <p><strong>Payment Method:</strong> ${order.paymentMethod === 'paymob' ? 'VISA/Card' : 'Cash on Delivery'}</p>
+                    <p><strong>Total Amount:</strong> <strong style="color: #10b981;">EGP ${(order.total || 0).toFixed(2)}</strong></p>
+                </div>
+                <div>
+                    <h3 style="margin-bottom: 10px; color: #3b82f6;">Customer Information</h3>
+                    <p><strong>Name:</strong> ${order.customer?.fullName || 'N/A'}</p>
+                    <p><strong>Email:</strong> ${order.customer?.email || 'N/A'}</p>
+                    <p><strong>Phone:</strong> ${order.customer?.phone || 'N/A'}</p>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <h3 style="margin-bottom: 10px; color: #f59e0b;">Shipping Address</h3>
+                <p>${order.shipping?.address || 'N/A'}</p>
+                <p>${order.shipping?.city || 'N/A'}, ${order.shipping?.governorate || 'N/A'}</p>
+                ${order.shipping?.notes ? `<p><strong>Notes:</strong> ${order.shipping.notes}</p>` : ''}
+            </div>
+            
+            <div>
+                <h3 style="margin-bottom: 10px; color: #8b5cf6;">Order Items</h3>
+                <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px;">
+                    ${order.items && order.items.length > 0 ? order.items.map(item => `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <img src="${item.image || 'assets/images/placeholder.jpg'}" alt="${item.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                                <div>
+                                    <div style="font-weight: 500;">${item.name}</div>
+                                    <div style="font-size: 12px; color: #94a3b8;">${item.colorName ? `Color: ${item.colorName}` : ''} | Qty: ${item.quantity}</div>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-weight: 500;">EGP ${(item.price * item.quantity).toFixed(2)}</div>
+                                <div style="font-size: 12px; color: #94a3b8;">EGP ${item.price.toFixed(2)} each</div>
+                            </div>
+                        </div>
+                    `).join('') : '<p>No items found</p>'}
+                </div>
+            </div>
+        `;
+
+        modal.classList.add('active');
+    } catch (error) {
+        console.error('Error loading order details:', error);
+        alert('Error loading order details');
+    }
+};
