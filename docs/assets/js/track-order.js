@@ -134,7 +134,7 @@ class OrderTracker {
                         <div class="order-item-details">
                             <div class="order-item-name">${item.name}</div>
                             <div class="order-item-variant">${item.colorName ? `Color: ${item.colorName}` : ''} | Quantity: ${item.quantity}</div>
-                            <div class="order-item-price"> ${Math.floor(item.price)} EGP each</div>
+                            <div class="order-item-price"> ${item.price.toFixed(2)} EGP each</div>
                         </div>
                     </div>
                 `).join('')}
@@ -143,7 +143,7 @@ class OrderTracker {
             <div class="order-summary">
                 <div class="summary-row">
                     <span>Subtotal:</span>
-                    <span>EGP ${Math.floor(order.total)}</span>
+                    <span>EGP ${order.total.toFixed(2)}</span>
                 </div>
                 <div class="summary-row">
                     <span>Shipping:</span>
@@ -151,7 +151,7 @@ class OrderTracker {
                 </div>
                 <div class="summary-row total">
                     <span>Total:</span>
-                    <span>EGP ${Math.floor(order.total)}</span>
+                    <span>EGP ${order.total.toFixed(2)}</span>
                 </div>
             </div>
         `;

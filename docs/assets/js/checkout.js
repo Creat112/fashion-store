@@ -26,7 +26,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     if (checkoutItems.length === 0) {
         if (listContainer) listContainer.innerHTML = "<p>Your cart is empty.</p>";
-        if (totalSpan) totalSpan.textContent = "EGP 0";
+        if (totalSpan) totalSpan.textContent = "EGP 0.00";
         return;
     }
 
@@ -55,7 +55,7 @@ window.addEventListener("DOMContentLoaded", () => {
             const itemPrice = document.createElement("div");
             itemPrice.style.fontWeight = "600";
             itemPrice.style.color = "#27ae60";
-            itemPrice.textContent = `${Math.floor(item.price * item.quantity)}EGP`;
+            itemPrice.textContent = `${(item.price * item.quantity).toFixed(2)}EGP`;
             
             li.appendChild(itemDetails);
             li.appendChild(itemPrice);
@@ -65,7 +65,7 @@ window.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    if (totalSpan) totalSpan.textContent = `EGP ${Math.floor(total)}`;
+    if (totalSpan) totalSpan.textContent = `EGP ${total.toFixed(2)}`;
 
     // Location handling (existing code)
     // ... (keep existing location code)

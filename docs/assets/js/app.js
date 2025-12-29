@@ -243,11 +243,11 @@ async function loadProducts(category = null, color = null, sortBy = null, search
                         
                         <div class="price-container">
                             ${hasDiscount ? `
-                                <span class="original-price">EGP ${Math.floor(product.originalPrice)}</span>
-                                <span class="price">${Math.floor(product.price)}EGP</span>
+                                <span class="original-price">EGP ${product.originalPrice.toFixed(2)}</span>
+                                <span class="price">${product.price.toFixed(2)}EGP</span>
                                 
                             ` : `
-                                <span class="price">${Math.floor(product.price) || 0}EGP</span>
+                                <span class="price">${product.price ? product.price.toFixed(2) : '0.00'}EGP</span>
                             `}
                         </div>
 
@@ -299,8 +299,8 @@ async function renderCartPage() {
                     <p>Your cart is empty</p>
                     <a href="products.html" class="btn">Continue Shopping</a>
                 </div>`;
-            if (subtotalEl) subtotalEl.textContent = 'EGP 0';
-            if (totalEl) totalEl.textContent = 'EGP 0';
+            if (subtotalEl) subtotalEl.textContent = 'EGP 0.00';
+            if (totalEl) totalEl.textContent = 'EGP 0.00';
             return;
         }
 
@@ -320,26 +320,26 @@ async function renderCartPage() {
                 <div class="cart-item-details" style="flex: 1;">
                     <h3>${item.name}</h3>
                     ${colorDisplay}
-                    <p class="price">${Math.floor(item.price)}EGP</p>
+                    <p class="price">${item.price.toFixed(2)}EGP</p>
                     <div class="quantity-controls" style="margin: 0.5rem 0;">
                         <input type="number" class="qty-input" min="1" value="${item.quantity}" style="width: 50px;" />
                     </div>
                 </div>
                 <div class="actions">
                      <button class="btn btn-outline remove-item" style="color: red; border-color: red;">Remove</button>
-                     <div class="line-total" style="font-weight: bold;">EGP ${Math.floor(line)}</div>
+                     <div class="line-total" style="font-weight: bold;">EGP ${line.toFixed(2)}</div>
                 </div>
             </div>`;
         }).join('');
 
         container.innerHTML = html;
-        if (subtotalEl) subtotalEl.textContent = `EGP ${Math.floor(subtotal)}`;
-        if (totalEl) totalEl.textContent = `EGP ${Math.floor(subtotal)}`;
+        if (subtotalEl) subtotalEl.textContent = `EGP ${subtotal.toFixed(2)}`;
+        if (totalEl) totalEl.textContent = `EGP ${subtotal.toFixed(2)}`;
 
         // Helper to update UI line total
         const updateLineTotal = (itemEl, price, qty) => {
             const lineTotal = itemEl.querySelector('.line-total');
-            lineTotal.textContent = `EGP ${Math.floor(price * qty)}`;
+            lineTotal.textContent = `EGP ${(price * qty).toFixed(2)}`;
         };
 
         // Events
@@ -433,9 +433,9 @@ async function loadProductSlider() {
                         ` : ''}
                         <div class="price">
                             ${hasDiscount ? `
-                                <span class="original-price">EGP ${Math.floor(item.originalPrice)}</span>
-                                <span class="decreased">EGP ${Math.floor(item.displayPrice)}</span>
-                            ` : `EGP ${Math.floor(item.displayPrice)}`}
+                                <span class="original-price">EGP ${item.originalPrice ? item.originalPrice.toFixed(2) : ''}</span>
+                                <span class="decreased">EGP ${item.displayPrice.toFixed(2)}</span>
+                            ` : `EGP ${item.displayPrice.toFixed(2)}`}
                         </div>
                         ${isOutOfStock ? '<span class="out-of-stock">Out of Stock</span>' : ''}
                     </div>
