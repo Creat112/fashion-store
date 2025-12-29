@@ -243,7 +243,7 @@ async function loadProducts(category = null, color = null, sortBy = null, search
                         
                         <div class="price-container">
                             ${hasDiscount ? `
-                                <span class="original-price">$${product.originalPrice.toFixed(2)}</span>
+                                <span class="original-price">EGP ${product.originalPrice.toFixed(2)}</span>
                                 <span class="price">${product.price.toFixed(2)}EGP</span>
                                 
                             ` : `
@@ -433,9 +433,9 @@ async function loadProductSlider() {
                         ` : ''}
                         <div class="price">
                             ${hasDiscount ? `
-                                <span class="original-price">$${item.originalPrice ? item.originalPrice.toFixed(2) : ''}</span>
-                                <span class="decreased">$${item.displayPrice.toFixed(2)}</span>
-                            ` : `$${item.displayPrice.toFixed(2)}`}
+                                <span class="original-price">EGP ${item.originalPrice ? item.originalPrice.toFixed(2) : ''}</span>
+                                <span class="decreased">EGP ${item.displayPrice.toFixed(2)}</span>
+                            ` : `EGP ${item.displayPrice.toFixed(2)}`}
                         </div>
                         ${isOutOfStock ? '<span class="out-of-stock">Out of Stock</span>' : ''}
                     </div>

@@ -81,11 +81,11 @@ function renderProductDetail(product) {
                 
                 <div class="product-price">
                     ${hasDiscount ? `
-                        <span class="original-price">$${product.originalPrice.toFixed(2)}</span>
-                        <span class="current-price">$${displayPrice.toFixed(2)}</span>
+                        <span class="original-price">EGP ${product.originalPrice.toFixed(2)}</span>
+                        <span class="current-price">EGP ${displayPrice.toFixed(2)}</span>
                         <span class="discount-badge">${product.discount}% OFF</span>
                     ` : `
-                        <span class="current-price">$${displayPrice.toFixed(2)}</span>
+                        <span class="current-price">EGP ${displayPrice.toFixed(2)}</span>
                     `}
                 </div>
 

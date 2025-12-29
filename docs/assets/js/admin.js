@@ -614,9 +614,10 @@ function initOrderDetailsModal() {
 window.viewOrderDetails = async function (orderId) {
     try {
         const orders = await getOrders();
-        const order = orders.find(o => o.id === orderId);
+        const order = orders.find(o => o.id == orderId);
         
         if (!order) {
+            console.error('Order not found. Looking for ID:', orderId, 'Available orders:', orders.map(o => ({ id: o.id, orderNumber: o.orderNumber })));
             alert('Order not found');
             return;
         }
