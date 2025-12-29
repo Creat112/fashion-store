@@ -81,11 +81,11 @@ function renderProductDetail(product) {
                 
                 <div class="product-price">
                     ${hasDiscount ? `
-                        <span class="original-price">EGP ${product.originalPrice.toFixed(2)}</span>
-                        <span class="current-price">EGP ${displayPrice.toFixed(2)}</span>
+                        <span class="original-price">EGP ${Math.floor(product.originalPrice)}</span>
+                        <span class="current-price">EGP ${Math.floor(displayPrice)}</span>
                         <span class="discount-badge">${product.discount}% OFF</span>
                     ` : `
-                        <span class="current-price">EGP ${displayPrice.toFixed(2)}</span>
+                        <span class="current-price">EGP ${Math.floor(displayPrice)}</span>
                     `}
                 </div>
 
@@ -218,7 +218,7 @@ function updatePriceAndStock(price, stock) {
 
     // Update price
     const currentPriceEl = document.querySelector('.current-price');
-    currentPriceEl.textContent = `EGP ${price.toFixed(2)}`;
+    currentPriceEl.textContent = `EGP ${Math.floor(price)}`;
 
     // Update stock
     const stockStatus = document.getElementById('stock-status');
