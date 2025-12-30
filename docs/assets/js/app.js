@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Mobile menu
     const menuBtn = document.getElementById('menu-btn');
-    const navLinks = document.getElementById('nav-links');
+    const navLinks = document.querySelector('.nav-links');
     if (menuBtn && navLinks) {
         menuBtn.addEventListener('click', () => {
             navLinks.classList.toggle('active');
