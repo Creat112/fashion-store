@@ -433,7 +433,7 @@ async function loadProductSlider() {
                         ` : ''}
                         <div class="price">
                             ${hasDiscount ? `
-                                <span class="original-price">EGP ${item.originalPrice ? item.originalPrice.toFixed(2) : ''}</span>
+                                <span class="original-price">EGP ${item.originalPrice ? item.originalPrice.toFixed(2) : ''}</span> <br>
                                 <span class="decreased">EGP ${item.displayPrice.toFixed(2)}</span>
                             ` : `EGP ${item.displayPrice.toFixed(2)}`}
                         </div>
