@@ -341,15 +341,29 @@ const createTables = async () => {
         `);
 
         await pool.execute(`
+            CREATE TABLE IF NOT EXISTS product_sizes (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                productId INT,
+                sizeName VARCHAR(100),
+                sizeCode VARCHAR(50),
+                price DECIMAL(10, 2),
+                stock INT DEFAULT 0,
+                FOREIGN KEY(productId) REFERENCES products(id) ON DELETE CASCADE
+            )
+        `);
+
+        await pool.execute(`
             CREATE TABLE IF NOT EXISTS cart (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 productId INT,
                 quantity INT,
                 userId INT,
                 colorId INT NULL,
+                sizeId INT NULL,
                 addedAt DATETIME,
                 FOREIGN KEY(productId) REFERENCES products(id) ON DELETE CASCADE,
-                FOREIGN KEY(colorId) REFERENCES product_colors(id) ON DELETE SET NULL
+                FOREIGN KEY(colorId) REFERENCES product_colors(id) ON DELETE SET NULL,
+                FOREIGN KEY(sizeId) REFERENCES product_sizes(id) ON DELETE SET NULL
             )
         `);
 
@@ -369,7 +383,10 @@ const createTables = async () => {
         const migrations = [
             { column: 'discount_type', sql: `ALTER TABLE discount_codes ADD COLUMN discount_type ENUM('percentage', 'fixed') DEFAULT 'percentage'` },
             { column: 'discount_value', sql: `ALTER TABLE discount_codes ADD COLUMN discount_value DECIMAL(10,2) DEFAULT 0` },
-            { column: 'fixed_amount', sql: `ALTER TABLE discount_codes ADD COLUMN fixed_amount DECIMAL(10,2) DEFAULT 0` }
+            { column: 'fixed_amount', sql: `ALTER TABLE discount_codes ADD COLUMN fixed_amount DECIMAL(10,2) DEFAULT 0` },
+            { column: 'cart.sizeId', sql: `ALTER TABLE cart ADD COLUMN sizeId INT NULL` },
+            { column: 'order_items.sizeId', sql: `ALTER TABLE order_items ADD COLUMN sizeId INT NULL` },
+            { column: 'order_items.sizeName', sql: `ALTER TABLE order_items ADD COLUMN sizeName VARCHAR(100)` }
         ];
 
         for (const migration of migrations) {
@@ -377,7 +394,7 @@ const createTables = async () => {
                 await pool.execute(migration.sql);
                 console.log(`Added column: ${migration.column}`);
             } catch (migrationErr) {
-                if (migrationErr.code !== 'ER_DUP_FIELDNAME' && !migrationErr.message.includes('Duplicate column')) {
+                if (migrationErr.code !== 'ER_DUP_FIELDNAME' && !migrationErr.message.includes('Duplicate column') && !migrationErr.message.includes('duplicate')) {
                     console.log(`Migration note for ${migration.column}:`, migrationErr.message);
                 }
             }
@@ -419,6 +436,8 @@ const createTables = async () => {
                 productName VARCHAR(255),
                 colorId INT NULL,
                 colorName VARCHAR(100),
+                sizeId INT NULL,
+                sizeName VARCHAR(100),
                 FOREIGN KEY(orderId) REFERENCES orders(id) ON DELETE CASCADE
             )
         `);
