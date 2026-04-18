@@ -1,5 +1,6 @@
 import { api } from './api.js';
 
+const SHIPPING_FEE = 90;
 let selectedLocation = null;
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -20,6 +21,7 @@ window.addEventListener("DOMContentLoaded", () => {
     }
     const listContainer = document.getElementById("checkout-list");
     const totalSpan = document.getElementById("order-total");
+    const shippingFeeSpan = document.getElementById("shipping-fee");
     const checkoutForm = document.getElementById("checkoutForm");
     let total = 0;
 
@@ -31,6 +33,7 @@ window.addEventListener("DOMContentLoaded", () => {
         if (checkoutItems.length === 0) {
             listContainer.innerHTML = "<p>Your cart is empty.</p>";
             if (totalSpan) totalSpan.textContent = "EGP 0.00";
+            if (shippingFeeSpan) shippingFeeSpan.textContent = "EGP 0.00";
             return;
         }
 
@@ -84,6 +87,7 @@ window.addEventListener("DOMContentLoaded", () => {
     
     function updateTotal() {
         if (!totalSpan) return;
+        if (shippingFeeSpan) shippingFeeSpan.textContent = `EGP ${SHIPPING_FEE.toFixed(2)}`;
         if (appliedDiscount) {
             let discountAmt = 0;
             if (appliedDiscount.discount_type === 'percentage') {
@@ -91,10 +95,11 @@ window.addEventListener("DOMContentLoaded", () => {
             } else if (appliedDiscount.discount_type === 'fixed') {
                 discountAmt = appliedDiscount.fixed_amount;
             }
-            const finalTotal = Math.max(0, total - discountAmt); // Ensure total doesn't go negative
-            totalSpan.innerHTML = `<del style="font-size:14px; color:#94a3b8;">EGP ${total.toFixed(2)}</del> EGP ${finalTotal.toFixed(2)}`;
+            const discountedSubtotal = Math.max(0, total - discountAmt);
+            const finalTotal = discountedSubtotal + SHIPPING_FEE;
+            totalSpan.innerHTML = `<del style="font-size:14px; color:#94a3b8;">EGP ${(total + SHIPPING_FEE).toFixed(2)}</del> EGP ${finalTotal.toFixed(2)}`;
         } else {
-            totalSpan.textContent = `EGP ${total.toFixed(2)}`;
+            totalSpan.textContent = `EGP ${(total + SHIPPING_FEE).toFixed(2)}`;
         }
     }
 
@@ -629,11 +634,11 @@ window.addEventListener("DOMContentLoaded", () => {
                     discountAmount = appliedDiscount.fixed_amount;
                 }
             }
-            const finalOrderTotal = Math.max(0, total - discountAmount);
+            const finalOrderTotal = Math.max(0, total - discountAmount) + SHIPPING_FEE;
 
             const orderData = {
                 customer: { fullName, email, phone, secondaryPhone },
-                shipping: { governorate, city, address, notes, location: selectedLocation },
+                shipping: { governorate, city, address, notes, location: selectedLocation, fee: SHIPPING_FEE },
                 items: checkoutItems,
                 total: finalOrderTotal,
                 discountCode: appliedDiscount ? appliedDiscount.code : null,

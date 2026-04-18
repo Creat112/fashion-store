@@ -145,9 +145,9 @@ router.get('/config', (req, res) => {
                 minOrderForTaxExempt: 1000
             },
             shipping: {
-                cairo: { baseRate: 50, freeShippingThreshold: 500 },
-                alexandria: { baseRate: 60, freeShippingThreshold: 600 },
-                otherGovernorates: { baseRate: 80, freeShippingThreshold: 800 }
+                cairo: { baseRate: 90, freeShippingThreshold: Infinity },
+                alexandria: { baseRate: 90, freeShippingThreshold: Infinity },
+                otherGovernorates: { baseRate: 90, freeShippingThreshold: Infinity }
             },
             currency: 'EGP'
         };

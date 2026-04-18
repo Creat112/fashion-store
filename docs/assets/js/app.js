@@ -3,6 +3,8 @@ import { updateAuthUI, initAuth } from './auth.js';
 import { getProducts } from './products.js';
 import { addToCart, updateCartCount, getCartItems, updateCartQuantity, removeFromCart } from './cart.js';
 
+const SHIPPING_FEE = 90;
+
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
     // Auth UI
@@ -293,6 +295,7 @@ async function loadProducts(category = null, color = null, sortBy = null, search
 async function renderCartPage() {
     const container = document.getElementById('cart-items');
     const subtotalEl = document.getElementById('subtotal');
+    const shippingEl = document.getElementById('shipping-fee');
     const totalEl = document.getElementById('total');
     if (!container) return;
 
@@ -306,6 +309,7 @@ async function renderCartPage() {
                     <a href="products.html" class="btn">Continue Shopping</a>
                 </div>`;
             if (subtotalEl) subtotalEl.textContent = 'EGP 0.00';
+            if (shippingEl) shippingEl.textContent = 'EGP 0.00';
             if (totalEl) totalEl.textContent = 'EGP 0.00';
             return;
         }
@@ -343,7 +347,8 @@ async function renderCartPage() {
 
         container.innerHTML = html;
         if (subtotalEl) subtotalEl.textContent = `EGP ${subtotal.toFixed(2)}`;
-        if (totalEl) totalEl.textContent = `EGP ${subtotal.toFixed(2)}`;
+        if (shippingEl) shippingEl.textContent = `EGP ${SHIPPING_FEE.toFixed(2)}`;
+        if (totalEl) totalEl.textContent = `EGP ${(subtotal + SHIPPING_FEE).toFixed(2)}`;
 
         // Helper to update UI line total
         const updateLineTotal = (itemEl, price, qty) => {

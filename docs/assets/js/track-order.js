@@ -83,6 +83,10 @@ class OrderTracker {
         
         // Generate timeline based on order status and dates
         const timeline = this.generateTimeline(order);
+        const shippingFee = Number(order.shipping?.fee || 90);
+        const itemsSubtotal = Array.isArray(order.items)
+            ? order.items.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity || 1)), 0)
+            : Math.max(0, Number(order.total || 0) - shippingFee);
         
         const orderHTML = `
             <div class="order-header">
@@ -143,11 +147,11 @@ class OrderTracker {
             <div class="order-summary">
                 <div class="summary-row">
                     <span>Subtotal:</span>
-                    <span>EGP ${order.total.toFixed(2)}</span>
+                    <span>EGP ${itemsSubtotal.toFixed(2)}</span>
                 </div>
                 <div class="summary-row">
                     <span>Shipping:</span>
-                    <span>Free</span>
+                    <span>EGP ${shippingFee.toFixed(2)}</span>
                 </div>
                 <div class="summary-row total">
                     <span>Total:</span>

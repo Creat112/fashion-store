@@ -23,5 +23,9 @@
 - Public storefront pages use `docs/footer.html` loaded by `docs/assets/js/footer.js`.
 - The footer social section contains only Instagram and links to `https://www.instagram.com/_savx_1/`.
 
+## Store Pricing Rules
+- Shipping is a flat 90 EGP fee shown in cart, checkout, and order tracking.
+- Checkout order totals include the 90 EGP shipping fee after product discounts.
+
 ## User Preferences
 - Preserve the imported project structure and dependencies; do not rewrite from scratch.
