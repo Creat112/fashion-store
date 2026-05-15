@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /cart.html
+Disallow: /checkout.html
+Disallow: /thank-you.html
+Disallow: /payment-result.html
+Disallow: /login.html
+Disallow: /signup.html
+Disallow: /api/
+
+Sitemap: https://savx.store/sitemap.xml
