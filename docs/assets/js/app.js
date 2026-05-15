@@ -201,8 +201,8 @@ async function loadProducts(category = null, color = null, sortBy = null, search
         // Sort products client-side
         if (sortBy) {
             filteredProducts.sort((a, b) => {
-                if (sortBy === 'price-asc') return a - b.price;
-                if (sortBy === 'price-desc') return b.price - a;
+                if (sortBy === 'price-asc') return a.price - b.price;
+                if (sortBy === 'price-desc') return b.price - a.price;
                 if (sortBy === 'name-asc') return a.name.localeCompare(b.name);
                 if (sortBy === 'name-desc') return b.name.localeCompare(a.name);
                 return 0;
