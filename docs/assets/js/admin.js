@@ -169,25 +169,57 @@ function initModalLogic() {
         form.addEventListener('submit', handleProductSubmit);
     }
 
-    // Auto-calc logic
-    const priceInput = document.getElementById('p-price');
+    // Bidirectional auto-calc logic
+    const priceInput    = document.getElementById('p-price');
     const discountInput = document.getElementById('p-discount');
+    const origInput     = document.getElementById('p-original-price');
 
-    function updateCalc() {
+    // Track which secondary field the user last touched so price changes
+    // know which direction to recalculate.
+    let lastEdited = 'discount';
+
+    function calcOriginalFromDiscount() {
         const p = parseFloat(priceInput.value) || 0;
         const d = parseFloat(discountInput.value) || 0;
-        if (p > 0) {
-            if (d > 0 && d < 100) {
-                const orig = p / (1 - (d / 100));
-                document.getElementById('p-original-price').value = orig.toFixed(2);
-            } else {
-                document.getElementById('p-original-price').value = p.toFixed(2);
-            }
+        if (p <= 0) return;
+        if (d > 0 && d < 100) {
+            origInput.value = (p / (1 - d / 100)).toFixed(2);
+        } else {
+            origInput.value = p.toFixed(2);
         }
     }
 
-    if (priceInput) priceInput.addEventListener('input', updateCalc);
-    if (discountInput) discountInput.addEventListener('input', updateCalc);
+    function calcDiscountFromOriginal() {
+        const p    = parseFloat(priceInput.value) || 0;
+        const orig = parseFloat(origInput.value)  || 0;
+        if (p <= 0 || orig <= 0) return;
+        if (orig > p) {
+            discountInput.value = ((1 - p / orig) * 100).toFixed(1);
+        } else {
+            discountInput.value = '0';
+        }
+    }
+
+    if (discountInput) {
+        discountInput.addEventListener('input', () => {
+            lastEdited = 'discount';
+            calcOriginalFromDiscount();
+        });
+    }
+
+    if (origInput) {
+        origInput.addEventListener('input', () => {
+            lastEdited = 'original';
+            calcDiscountFromOriginal();
+        });
+    }
+
+    if (priceInput) {
+        priceInput.addEventListener('input', () => {
+            if (lastEdited === 'original') calcDiscountFromOriginal();
+            else calcOriginalFromDiscount();
+        });
+    }
 }
 
 function resetForm() {
