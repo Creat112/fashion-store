@@ -1,0 +1,335 @@
+/* ============================================
+   Size Guide Page Styles
+   ============================================ */
+
+/* Hero */
+.size-guide-hero {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #1a252f 100%);
+    color: white;
+    padding: 5rem 0 4rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.size-guide-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 70% 50%, rgba(231, 76, 60, 0.15) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+.size-guide-hero .hero-eyebrow {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--secondary-color);
+    margin-bottom: 1rem;
+}
+
+.size-guide-hero h1 {
+    font-size: clamp(2.2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    margin-bottom: 1.25rem;
+    line-height: 1.1;
+}
+
+.size-guide-hero p {
+    font-size: 1.1rem;
+    opacity: 0.85;
+    max-width: 560px;
+    margin: 0 auto;
+    line-height: 1.7;
+}
+
+/* Main content area */
+.size-guide-content {
+    padding: 4rem 0 5rem;
+}
+
+/* Section cards */
+.size-section {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+    padding: 2.5rem;
+    margin-bottom: 2.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+    /* Scroll fade-in initial state */
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+.size-section.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.size-section:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.11);
+}
+
+/* Section header */
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--light-gray);
+}
+
+.section-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--primary-color), #1a252f);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.section-icon i {
+    font-size: 1.4rem;
+    color: #fff;
+}
+
+.section-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin: 0;
+}
+
+/* Responsive table wrapper */
+.table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+}
+
+/* Size table */
+.size-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+    min-width: 280px;
+}
+
+.size-table thead {
+    background: var(--primary-color);
+    color: #fff;
+}
+
+.size-table thead th {
+    padding: 0.9rem 1.25rem;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.size-table thead th:first-child {
+    text-align: left;
+    border-radius: 0;
+}
+
+.size-table tbody tr {
+    transition: background 0.2s ease;
+}
+
+/* Zebra rows */
+.size-table tbody tr:nth-child(odd) {
+    background: #fff;
+}
+
+.size-table tbody tr:nth-child(even) {
+    background: #f8f9fa;
+}
+
+.size-table tbody tr:hover {
+    background: rgba(231, 76, 60, 0.06);
+}
+
+.size-table tbody td {
+    padding: 0.9rem 1.25rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+
+.size-table tbody td:first-child {
+    text-align: left;
+    font-weight: 700;
+    color: var(--primary-color);
+    font-size: 1rem;
+}
+
+.size-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Size badge styling for the Size column */
+.size-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: var(--primary-color);
+    color: #fff;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+/* Measurement note */
+.measurement-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    margin-top: 1.25rem;
+    padding: 0.75rem 1rem;
+    background: #fff8f8;
+    border-left: 3px solid var(--secondary-color);
+    border-radius: 0 8px 8px 0;
+    font-size: 0.88rem;
+    color: #666;
+}
+
+.measurement-note i {
+    color: var(--secondary-color);
+    font-size: 1rem;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+/* Column labels (unit hint) */
+.unit-hint {
+    font-size: 0.78rem;
+    font-weight: 400;
+    opacity: 0.75;
+    display: block;
+    margin-top: 2px;
+}
+
+/* How to measure tip box */
+.measure-tip {
+    background: linear-gradient(135deg, #f8f9fa, #fff);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.75rem 2rem;
+    margin-bottom: 2.5rem;
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.measure-tip.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.measure-tip-icon {
+    width: 44px;
+    height: 44px;
+    background: var(--secondary-color);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.measure-tip-icon i {
+    font-size: 1.3rem;
+    color: #fff;
+}
+
+.measure-tip-body h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 0.4rem;
+}
+
+.measure-tip-body p {
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+@media (max-width: 768px) {
+    .size-guide-hero {
+        padding: 3.5rem 0 3rem;
+    }
+
+    .size-section {
+        padding: 1.75rem 1.25rem;
+    }
+
+    .section-header h2 {
+        font-size: 1.25rem;
+    }
+
+    .size-table thead th,
+    .size-table tbody td {
+        padding: 0.75rem 1rem;
+    }
+
+    .measure-tip {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .size-guide-hero {
+        padding: 3rem 0 2.5rem;
+    }
+
+    .size-guide-hero p {
+        font-size: 1rem;
+    }
+
+    .section-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+    }
+
+    .section-icon i {
+        font-size: 1.2rem;
+    }
+
+    .size-table {
+        font-size: 0.88rem;
+    }
+
+    .size-table thead th,
+    .size-table tbody td {
+        padding: 0.65rem 0.75rem;
+    }
+
+    .size-badge {
+        width: 30px;
+        height: 30px;
+        font-size: 0.78rem;
+    }
+}
