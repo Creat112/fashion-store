@@ -30,7 +30,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (productGrids.length > 0) {
             await loadProducts();
 
-            // Populate color filter dynamically
+            // Populate category and color filters dynamically from live products
+            await populateCategoryFilter();
             await populateColorFilter();
 
             // Filter/Sort listeners
@@ -126,6 +127,37 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('Error initializing app:', error);
     }
 });
+
+// Populate category filter with unique categories from products
+async function populateCategoryFilter() {
+    try {
+        const products = await getProducts();
+        const categorySet = new Set();
+
+        products.forEach(product => {
+            if (product.category && product.category.trim()) {
+                categorySet.add(product.category.trim());
+            }
+        });
+
+        const categoryFilter = document.getElementById('category-filter');
+        if (!categoryFilter) return;
+
+        // Keep the "All Categories" option, replace the rest
+        categoryFilter.innerHTML = '<option value="">All Categories</option>';
+
+        const sorted = Array.from(categorySet).sort();
+        sorted.forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat.toLowerCase();
+            // Capitalise first letter for display
+            option.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+            categoryFilter.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error populating category filter:', error);
+    }
+}
 
 // Populate color filter with available colors from products
 async function populateColorFilter() {
