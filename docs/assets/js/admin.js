@@ -284,8 +284,8 @@ function addColorRow(data = null) {
             
             for (const file of filesToProcess) {
                 try {
-                    // Lower quality for color variant images (300x300, 0.6 quality)
-                    const b64 = await compressImage(file, 300, 300, 0.6);
+                    // Color variant images — high quality
+                    const b64 = await compressImage(file, 1200, 1200, 0.9);
                     const reader = new FileReader();
                     reader.readAsDataURL(b64);
                     reader.onload = () => {
@@ -367,8 +367,8 @@ async function handleProductSubmit(e) {
     }
 
     if (imageInput.files && imageInput.files[0]) {
-        // Compress main image with smaller dimensions for large uploads
-        const blob = await compressImage(imageInput.files[0], 600, 600, 0.7);
+        // Compress main image — high quality
+        const blob = await compressImage(imageInput.files[0], 1200, 1200, 0.9);
         imageBase64 = await blobToBase64(blob);
     }
 
