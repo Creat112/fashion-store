@@ -207,6 +207,28 @@ function renderProductDetail(product) {
                         <p class="selected-size-name" style="margin-top: 12px; font-size: 0.9rem; color: #6b7280;">
                             Selected: <strong id="selected-size-display" style="color: #8b5cf6;">${selectedSize.sizeName}</strong>
                         </p>
+                        <a
+                            href="size-guide.html"
+                            style="
+                                display: inline-flex;
+                                align-items: center;
+                                gap: 6px;
+                                margin-top: 10px;
+                                font-size: 0.85rem;
+                                font-weight: 600;
+                                color: var(--primary-color);
+                                text-decoration: none;
+                                border-bottom: 1.5px dashed var(--primary-color);
+                                padding-bottom: 1px;
+                                transition: color 0.2s ease, border-color 0.2s ease;
+                            "
+                            onmouseover="this.style.color='var(--secondary-color)'; this.style.borderColor='var(--secondary-color)';"
+                            onmouseout="this.style.color='var(--primary-color)'; this.style.borderColor='var(--primary-color)';"
+                            aria-label="View full size guide"
+                        >
+                            <i class="ri-ruler-2-line" style="font-size: 1rem;"></i>
+                            Not sure about your size? View Size Guide
+                        </a>
                     </div>
                 ` : ''}
 
