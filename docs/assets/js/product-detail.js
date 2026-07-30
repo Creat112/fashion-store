@@ -100,7 +100,7 @@ function renderProductDetail(product) {
         <div class="product-detail-grid">
             <div class="product-image-section">
                 <div class="image-slider" style="position: relative; width: 100%;">
-                    <img src="${currentImages[0]}" alt="${product.name}" class="product-main-image" id="main-image" style="width: 100%; height: auto; object-fit: cover;">
+                    <img src="${currentImages[0]}" alt="${product.name}" class="product-main-image" id="main-image">
                     
                     ${currentImages.length > 1 ? `
                         <button id="prev-image" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; z-index: 10;">
