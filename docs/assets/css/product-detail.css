@@ -29,9 +29,6 @@
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     transition: opacity 0.3s ease;
     background: #f8f8f8;
-    /* Prevent browser from blurring upscaled images */
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
 }
 
 
