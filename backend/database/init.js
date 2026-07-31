@@ -392,6 +392,21 @@ const createTables = async () => {
             { column: 'product_colors.images', sql: `ALTER TABLE product_colors ADD COLUMN images TEXT` }
         ];
 
+        // Widen image columns from TEXT (65 KB) to LONGTEXT (4 GB) so
+        // base64-encoded product photos never hit the column size limit.
+        const columnWidenings = [
+            `ALTER TABLE products MODIFY COLUMN image LONGTEXT`,
+            `ALTER TABLE product_colors MODIFY COLUMN image LONGTEXT`,
+            `ALTER TABLE product_colors MODIFY COLUMN images LONGTEXT`,
+        ];
+        for (const sql of columnWidenings) {
+            try {
+                await pool.execute(sql);
+            } catch (e) {
+                console.log('Column widening note:', e.message);
+            }
+        }
+
         for (const migration of migrations) {
             try {
                 await pool.execute(migration.sql);

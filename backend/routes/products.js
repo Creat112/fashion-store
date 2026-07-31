@@ -281,6 +281,7 @@ router.put('/:id', async (req, res) => {
         res.json({ success: true });
     } catch (err) {
         await connection.rollback();
+        console.error('PUT /products error:', err.message);
         res.status(500).json({ error: err.message });
     } finally {
         connection.release();

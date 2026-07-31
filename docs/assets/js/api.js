@@ -25,8 +25,9 @@ export const api = {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
-        if (!res.ok) throw new Error('API Error');
-        return res.json();
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.error || 'API Error');
+        return result;
     },
 
     async delete(endpoint) {
