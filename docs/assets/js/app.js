@@ -433,27 +433,32 @@ async function loadProductSlider() {
             if (product.colors && product.colors.length > 0) {
                 // Add each color variant as a separate slider item
                 product.colors.forEach(color => {
-                    sliderItems.push({
-                        ...product,
-                        selectedColor: color,
-                        displayImage: color.image || product.image,
-                        displayPrice: color.price || product.price,
-                        colorName: color.colorName,
-                        colorCode: color.colorCode,
-                        stock: color.stock || 0
-                    });
+                    // Only show color variants that can currently be purchased.
+                    if (Number(color.stock) > 0) {
+                        sliderItems.push({
+                            ...product,
+                            selectedColor: color,
+                            displayImage: color.image || product.image,
+                            displayPrice: color.price || product.price,
+                            colorName: color.colorName,
+                            colorCode: color.colorCode,
+                            stock: Number(color.stock)
+                        });
+                    }
                 });
             } else {
                 // Add product without color variants
-                sliderItems.push({
-                    ...product,
-                    selectedColor: null,
-                    displayImage: product.image,
-                    displayPrice: product.price,
-                    colorName: null,
-                    colorCode: null,
-                    stock: product.stock || 0
-                });
+                if (Number(product.stock) > 0) {
+                    sliderItems.push({
+                        ...product,
+                        selectedColor: null,
+                        displayImage: product.image,
+                        displayPrice: product.price,
+                        colorName: null,
+                        colorCode: null,
+                        stock: Number(product.stock)
+                    });
+                }
             }
         });
 
