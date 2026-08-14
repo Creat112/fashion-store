@@ -30,27 +30,88 @@ function normalizeSize(s) {
     };
 }
 
-// Get all products with color and size variants
+// Get products with color and size variants.
+// Legacy callers still receive an array. Paginated callers receive
+// { items, pagination } so the catalog can avoid loading the entire image-heavy
+// product table on every page visit.
 router.get('/', async (req, res) => {
-    const { category, includeDisabled } = req.query;
+    const { category, includeDisabled, page, limit, search, color, sort, inStock } = req.query;
     const pool = getDB();
 
-    let query = "SELECT * FROM products WHERE 1=1";
+    const isPaginated = page !== undefined || limit !== undefined;
+    const currentPage = Math.max(parseInt(page, 10) || 1, 1);
+    const pageSize = Math.min(Math.max(parseInt(limit, 10) || 12, 1), 24);
+    const offset = (currentPage - 1) * pageSize;
+
+    const conditions = ["1=1"];
     let params = [];
 
     if (includeDisabled !== 'true') {
-        query += " AND disabled = 0";
+        conditions.push("disabled = 0");
     }
 
     if (category) {
-        query += " AND category = ?";
+        conditions.push("LOWER(category) = LOWER(?)");
         params.push(category);
     }
 
+    if (search && search.trim()) {
+        const searchTerm = `%${search.trim()}%`;
+        conditions.push("(name LIKE ? OR category LIKE ? OR description LIKE ?)");
+        params.push(searchTerm, searchTerm, searchTerm);
+    }
+
+    if (color && color.trim()) {
+        conditions.push(`
+            EXISTS (
+                SELECT 1 FROM product_colors filter_colors
+                WHERE filter_colors.productId = products.id
+                  AND LOWER(filter_colors.colorName) LIKE LOWER(?)
+            )
+        `);
+        params.push(`%${color.trim()}%`);
+    }
+
+    if (inStock === 'true') {
+        conditions.push(`(
+            stock > 0
+            OR EXISTS (SELECT 1 FROM product_colors stock_colors WHERE stock_colors.productId = products.id AND stock_colors.stock > 0)
+            OR EXISTS (SELECT 1 FROM product_sizes stock_sizes WHERE stock_sizes.productId = products.id AND stock_sizes.stock > 0)
+        )`);
+    }
+
+    const whereClause = conditions.join(' AND ');
+    const sortMap = {
+        'price-asc': 'price ASC, id DESC',
+        'price-desc': 'price DESC, id DESC',
+        'name-asc': 'name ASC, id DESC',
+        'name-desc': 'name DESC, id DESC',
+        'newest': 'id DESC'
+    };
+    const orderBy = sortMap[sort] || sortMap.newest;
+
     try {
-        const [products] = await pool.execute(query, params);
+        let productsQuery = `SELECT * FROM products WHERE ${whereClause} ORDER BY ${orderBy}`;
+        if (isPaginated) {
+            productsQuery += ` LIMIT ${pageSize} OFFSET ${offset}`;
+        }
+
+        const [products] = await pool.execute(productsQuery, params);
 
         if (products.length === 0) {
+            if (isPaginated) {
+                return res.json({
+                    items: [],
+                    pagination: {
+                        page: currentPage,
+                        limit: pageSize,
+                        total: 0,
+                        totalPages: 0,
+                        hasNextPage: false,
+                        hasPreviousPage: currentPage > 1
+                    }
+                });
+            }
             return res.json([]);
         }
 
@@ -58,7 +119,9 @@ router.get('/', async (req, res) => {
         const placeholders = productIds.map(() => '?').join(',');
         
         const [colors] = await pool.execute(
-            `SELECT * FROM product_colors WHERE productId IN (${placeholders})`,
+            `${isPaginated
+                ? `SELECT id, productId, colorName, colorCode, price, stock, image FROM product_colors WHERE productId IN (${placeholders})`
+                : `SELECT * FROM product_colors WHERE productId IN (${placeholders})`}`,
             productIds
         );
 
@@ -91,7 +154,56 @@ router.get('/', async (req, res) => {
             };
         });
 
-        res.json(productsWithVariants);
+        if (!isPaginated) {
+            return res.json(productsWithVariants);
+        }
+
+        const [countRows] = await pool.execute(
+            `SELECT COUNT(*) AS total FROM products WHERE ${whereClause}`,
+            params
+        );
+        const total = Number(countRows[0]?.total || 0);
+        res.json({
+            items: productsWithVariants,
+            pagination: {
+                page: currentPage,
+                limit: pageSize,
+                total,
+                totalPages: Math.ceil(total / pageSize),
+                hasNextPage: offset + productsWithVariants.length < total,
+                hasPreviousPage: currentPage > 1
+            }
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Lightweight metadata for catalog filters. This avoids downloading every
+// product image just to populate two select menus.
+router.get('/meta', async (req, res) => {
+    const pool = getDB();
+    try {
+        const [[categories], [colors]] = await Promise.all([
+            pool.execute(`
+                SELECT DISTINCT category
+                FROM products
+                WHERE disabled = 0 AND category IS NOT NULL AND TRIM(category) <> ''
+                ORDER BY category ASC
+            `),
+            pool.execute(`
+                SELECT DISTINCT pc.colorName
+                FROM product_colors pc
+                INNER JOIN products p ON p.id = pc.productId
+                WHERE p.disabled = 0 AND pc.colorName IS NOT NULL AND TRIM(pc.colorName) <> ''
+                ORDER BY pc.colorName ASC
+            `)
+        ]);
+
+        res.json({
+            categories: categories.map(row => row.category),
+            colors: colors.map(row => row.colorName)
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

@@ -38,7 +38,6 @@ export const getCartItems = async () => {
 export const updateCartQuantity = async (id, quantity) => {
     try {
         await api.put(`/cart/${id}`, { quantity });
-        await updateCartCount();
     } catch (error) {
         console.error('Update quantity error:', error);
     }
@@ -47,7 +46,6 @@ export const updateCartQuantity = async (id, quantity) => {
 export const removeFromCart = async (id) => {
     try {
         await api.delete(`/cart/${id}`);
-        await updateCartCount();
     } catch (error) {
         console.error('Remove item error:', error);
     }
@@ -58,16 +56,18 @@ export const clearCart = async () => {
     if (!userId) return;
     try {
         await api.delete(`/cart?userId=${userId}`);
-        await updateCartCount();
     } catch (error) {
         console.error('Clear cart error:', error);
     }
 };
 
-export const updateCartCount = async () => {
-    const items = await getCartItems();
+export const updateCartCount = async (items = null) => {
+    if (items === null) {
+        items = await getCartItems();
+    }
     const count = items.reduce((sum, item) => sum + item.quantity, 0);
     document.querySelectorAll('.cart-count').forEach(el => el.textContent = count);
+    return count;
 };
 
 // Checkout logic (simulated)

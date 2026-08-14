@@ -1,9 +1,12 @@
 // assets/js/app.js
 import { updateAuthUI, initAuth } from './auth.js';
-import { getProducts } from './products.js';
+import { getProductsPage, getProductMeta } from './products.js';
 import { addToCart, updateCartCount, getCartItems, updateCartQuantity, removeFromCart } from './cart.js';
 
 const SHIPPING_FEE = 90;
+const PRODUCT_PAGE_SIZE = 8;
+let productsRequestId = 0;
+let searchDebounceTimer;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
@@ -22,17 +25,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
-        // Update cart count
-        await updateCartCount();
+        // Fetch the cart once. The cart page reuses this response instead of
+        // making a second identical request during initialization.
+        const initialCartItems = await getCartItems();
+        updateCartCount(initialCartItems);
 
         // Load products if on a product page
         const productGrids = document.querySelectorAll('.products-grid');
         if (productGrids.length > 0) {
-            await loadProducts();
-
-            // Populate category and color filters dynamically from live products
-            await populateCategoryFilter();
-            await populateColorFilter();
+            const initialSort = document.getElementById('sort-by')?.value || null;
+            await Promise.all([
+                loadProducts(null, null, initialSort),
+                populateFilters()
+            ]);
 
             // Filter/Sort listeners
             const categoryFilter = document.getElementById('category-filter');
@@ -61,12 +66,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (searchInput) {
                 searchInput.addEventListener('input', () => {
-                    loadProducts(categoryFilter ? categoryFilter.value : null, colorFilter ? colorFilter.value : null, sortBy ? sortBy.value : null, searchInput.value);
+                    clearTimeout(searchDebounceTimer);
+                    searchDebounceTimer = setTimeout(() => {
+                        loadProducts(categoryFilter ? categoryFilter.value : null, colorFilter ? colorFilter.value : null, sortBy ? sortBy.value : null, searchInput.value, 1);
+                    }, 250);
                 });
                 
                 searchInput.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') {
-                        loadProducts(categoryFilter ? categoryFilter.value : null, colorFilter ? colorFilter.value : null, sortBy ? sortBy.value : null, searchInput.value);
+                        clearTimeout(searchDebounceTimer);
+                        loadProducts(categoryFilter ? categoryFilter.value : null, colorFilter ? colorFilter.value : null, sortBy ? sortBy.value : null, searchInput.value, 1);
                     }
                 });
             }
@@ -87,7 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Initialize cart page if present
         if (document.getElementById('cart-items')) {
-            await renderCartPage();
+            await renderCartPage(initialCartItems);
         }
 
         // Add to cart delegation
@@ -128,127 +137,125 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// Populate category filter with unique categories from products
-async function populateCategoryFilter() {
+// Populate both filters with one small metadata request.
+async function populateFilters() {
+    const categoryFilter = document.getElementById('category-filter');
+    const colorFilter = document.getElementById('color-filter');
+    if (!categoryFilter && !colorFilter) return;
+
     try {
-        const products = await getProducts();
-        const categorySet = new Set();
+        const { categories = [], colors = [] } = await getProductMeta();
 
-        products.forEach(product => {
-            if (product.category && product.category.trim()) {
-                categorySet.add(product.category.trim());
-            }
-        });
+        if (categoryFilter) {
+            categoryFilter.innerHTML = '<option value="">All Categories</option>';
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category.toLowerCase();
+                option.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+                categoryFilter.appendChild(option);
+            });
+        }
 
-        const categoryFilter = document.getElementById('category-filter');
-        if (!categoryFilter) return;
-
-        // Keep the "All Categories" option, replace the rest
-        categoryFilter.innerHTML = '<option value="">All Categories</option>';
-
-        const sorted = Array.from(categorySet).sort();
-        sorted.forEach(cat => {
-            const option = document.createElement('option');
-            option.value = cat.toLowerCase();
-            // Capitalise first letter for display
-            option.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
-            categoryFilter.appendChild(option);
-        });
+        if (colorFilter) {
+            colorFilter.innerHTML = '<option value="">All Colors</option>';
+            colors.forEach(color => {
+                const option = document.createElement('option');
+                option.value = color.toLowerCase();
+                option.textContent = color;
+                colorFilter.appendChild(option);
+            });
+        }
     } catch (error) {
-        console.error('Error populating category filter:', error);
+        console.error('Error populating catalog filters:', error);
     }
 }
 
-// Populate color filter with available colors from products
-async function populateColorFilter() {
-    try {
-        const products = await getProducts(); // Get all products
-        const colorSet = new Set(); // Use Set to avoid duplicates
-        
-        // Collect all unique colors from all products
-        products.forEach(product => {
-            if (product.colors && product.colors.length > 0) {
-                product.colors.forEach(color => {
-                    if (color.colorName) {
-                        colorSet.add(color.colorName.trim());
-                    }
-                });
-            }
-        });
-        
-        // Get the color filter select element
-        const colorFilter = document.getElementById('color-filter');
-        if (!colorFilter) return;
-        
-        // Clear existing options except "All Colors"
-        colorFilter.innerHTML = '<option value="">All Colors</option>';
-        
-        // Sort colors alphabetically and add them to the filter
-        const sortedColors = Array.from(colorSet).sort();
-        sortedColors.forEach(color => {
-            const option = document.createElement('option');
-            option.value = color.toLowerCase();
-            option.textContent = color;
-            colorFilter.appendChild(option);
-        });
-        
-    } catch (error) {
-        console.error('Error populating color filter:', error);
-    }
+function productSkeletonMarkup(count = PRODUCT_PAGE_SIZE) {
+    return Array.from({ length: count }, () => `
+        <div class="product-card skeleton-card" aria-hidden="true">
+            <div class="skeleton skeleton-product-image"></div>
+            <div class="skeleton-card-content">
+                <div class="skeleton skeleton-line skeleton-line-short"></div>
+                <div class="skeleton skeleton-line"></div>
+                <div class="skeleton skeleton-line skeleton-line-price"></div>
+                <div class="skeleton skeleton-button"></div>
+            </div>
+        </div>
+    `).join('');
 }
 
-async function loadProducts(category = null, color = null, sortBy = null, searchQuery = null) {
+function showProductSkeletons() {
+    document.querySelectorAll('.products-grid').forEach(container => {
+        container.innerHTML = productSkeletonMarkup();
+    });
+}
+
+function renderPagination(pagination, filters) {
+    const container = document.getElementById('products-pagination');
+    if (!container || !pagination || pagination.totalPages <= 1) {
+        if (container) container.innerHTML = '';
+        return;
+    }
+
+    const { page, totalPages } = pagination;
+    const button = (label, targetPage, disabled = false, current = false) => `
+        <button class="pagination-btn${current ? ' active' : ''}" data-page="${targetPage}" ${disabled ? 'disabled' : ''}>
+            ${label}
+        </button>
+    `;
+    const pages = [];
+    const start = Math.max(1, page - 2);
+    const end = Math.min(totalPages, page + 2);
+    for (let pageNumber = start; pageNumber <= end; pageNumber += 1) {
+        pages.push(button(pageNumber, pageNumber, false, pageNumber === page));
+    }
+
+    container.innerHTML = `
+        ${button('<i class="ri-arrow-left-s-line"></i>', page - 1, !pagination.hasPreviousPage)}
+        <div class="pagination-pages">${pages.join('')}</div>
+        ${button('<i class="ri-arrow-right-s-line"></i>', page + 1, !pagination.hasNextPage)}
+    `;
+    container.querySelectorAll('[data-page]').forEach(control => {
+        control.addEventListener('click', () => {
+            const targetPage = Number(control.dataset.page);
+            if (targetPage > 0) {
+                loadProducts(filters.category, filters.color, filters.sortBy, filters.searchQuery, targetPage);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+    });
+}
+
+async function loadProducts(category = null, color = null, sortBy = null, searchQuery = null, page = 1) {
+    const containers = document.querySelectorAll('.products-grid');
+    if (containers.length === 0) return;
+
+    const requestId = ++productsRequestId;
+    const filters = { category, color, sortBy, searchQuery };
+    showProductSkeletons();
+
     try {
-        const products = await getProducts(category);
-        const containers = document.querySelectorAll('.products-grid');
+        const response = await getProductsPage({
+            page,
+            limit: PRODUCT_PAGE_SIZE,
+            category,
+            color,
+            sort: sortBy,
+            search: searchQuery
+        });
+        if (requestId !== productsRequestId) return;
 
-        if (containers.length === 0) return;
+        const products = response.items || [];
+        renderPagination(response.pagination, filters);
 
-        // Filter products based on search query
-        let filteredProducts = products;
-        if (searchQuery && searchQuery.trim() !== '') {
-            const query = searchQuery.toLowerCase().trim();
-            filteredProducts = products.filter(product => {
-                const nameMatch = product.name.toLowerCase().includes(query);
-                const categoryMatch = product.category && product.category.toLowerCase().includes(query);
-                const descriptionMatch = product.description && product.description.toLowerCase().includes(query);
-                return nameMatch || categoryMatch || descriptionMatch;
-            });
-        }
-
-        // Filter products by color
-        if (color && color.trim() !== '') {
-            const colorQuery = color.toLowerCase().trim();
-            filteredProducts = filteredProducts.filter(product => {
-                if (!product.colors || product.colors.length === 0) return false;
-                
-                // Check if any color matches the filter
-                return product.colors.some(productColor => {
-                    const colorName = productColor.colorName ? productColor.colorName.toLowerCase() : '';
-                    return colorName.includes(colorQuery);
-                });
-            });
-        }
-
-        // Sort products client-side
-        if (sortBy) {
-            filteredProducts.sort((a, b) => {
-                if (sortBy === 'price-asc') return a.price - b.price;
-                if (sortBy === 'price-desc') return b.price - a.price;
-                if (sortBy === 'name-asc') return a.name.localeCompare(b.name);
-                if (sortBy === 'name-desc') return b.name.localeCompare(a.name);
-                return 0;
-            });
-        }
-
-        if (filteredProducts.length === 0) {
+        if (products.length === 0) {
             containers.forEach(container => {
                 container.innerHTML = '<p class="no-products">No products found matching your criteria.</p>';
             });
             return;
         }
 
-        const html = filteredProducts.map(product => {
+        const html = products.map(product => {
             const hasDiscount = product.discount && product.discount > 0;
             const hasColors = product.colors && product.colors.length > 0;
 
@@ -272,7 +279,7 @@ async function loadProducts(category = null, color = null, sortBy = null, search
                 <div class="product-card">
                     <span class="stock-badge ${stockBadgeClass}">${stockBadgeText}</span>
                     <div class="product-image-container">
-                        <img src="${product.image}" alt="${product.name}" onclick="window.location.href='product-detail.html?id=${product.id}'">
+                        <img src="${product.image}" alt="${product.name}" loading="lazy" decoding="async" onclick="window.location.href='product-detail.html?id=${product.id}'">
                         <button class="share-btn" onclick="shareProduct(${product.id}, '${product.name}')" title="Share product">
                             <i class="ri-share-line"></i>
                         </button>
@@ -321,10 +328,41 @@ async function loadProducts(category = null, color = null, sortBy = null, search
         });
     } catch (error) {
         console.error('Error loading products:', error);
+        if (requestId === productsRequestId) {
+            containers.forEach(container => {
+                container.innerHTML = `
+                    <div class="catalog-error">
+                        <i class="ri-wifi-off-line"></i>
+                        <p>We couldn't load the products right now.</p>
+                        <button class="btn retry-products">Try again</button>
+                    </div>
+                `;
+                container.querySelector('.retry-products')?.addEventListener('click', () => {
+                    loadProducts(category, color, sortBy, searchQuery, page);
+                });
+            });
+        }
     }
 }
 
-async function renderCartPage() {
+function cartSkeletonMarkup(count = 2) {
+    return Array.from({ length: count }, () => `
+        <div class="cart-item cart-skeleton" aria-hidden="true">
+            <div class="skeleton skeleton-cart-image"></div>
+            <div class="cart-skeleton-details">
+                <div class="skeleton skeleton-line skeleton-line-short"></div>
+                <div class="skeleton skeleton-line"></div>
+                <div class="skeleton skeleton-line skeleton-line-price"></div>
+            </div>
+            <div class="cart-skeleton-actions">
+                <div class="skeleton skeleton-button"></div>
+                <div class="skeleton skeleton-line skeleton-line-short"></div>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function renderCartPage(items = null) {
     const container = document.getElementById('cart-items');
     const subtotalEl = document.getElementById('subtotal');
     const shippingEl = document.getElementById('shipping-fee');
@@ -332,7 +370,11 @@ async function renderCartPage() {
     if (!container) return;
 
     try {
-        const items = await getCartItems();
+        if (items === null) {
+            container.innerHTML = cartSkeletonMarkup();
+            items = await getCartItems();
+        }
+        updateCartCount(items);
 
         if (!items || items.length === 0) {
             container.innerHTML = `
@@ -361,7 +403,7 @@ async function renderCartPage() {
             
             return `
             <div class="cart-item" data-id="${item.id}" data-product-id="${item.productId}">
-                <img src="${displayImage}" alt="${item.name}" class="cart-item-image" style="width: 80px; height: 80px; object-fit: cover; margin-right: 1rem;" />
+                <img src="${displayImage}" alt="${item.name}" class="cart-item-image" loading="lazy" decoding="async" style="width: 80px; height: 80px; object-fit: cover; margin-right: 1rem;" />
                 <div class="cart-item-details" style="flex: 1;">
                     <h3>${item.name}</h3>
                     ${variantInfo}
@@ -420,11 +462,33 @@ async function renderCartPage() {
 }
 
 // Product Slider Functions
+function showSliderSkeleton() {
+    const slider = document.getElementById('product-slider');
+    if (!slider) return;
+    slider.innerHTML = Array.from({ length: 4 }, () => `
+        <div class="slider-product-card slider-skeleton" aria-hidden="true">
+            <div class="skeleton skeleton-slider-image"></div>
+            <div class="product-info">
+                <div class="skeleton skeleton-line"></div>
+                <div class="skeleton skeleton-line skeleton-line-price"></div>
+            </div>
+        </div>
+    `).join('');
+}
+
 async function loadProductSlider() {
+    const slider = document.getElementById('product-slider');
+    if (!slider) return;
+    showSliderSkeleton();
+
     try {
-        const products = await getProducts();
-        const slider = document.getElementById('product-slider');
-        if (!slider) return;
+        const response = await getProductsPage({
+            page: 1,
+            limit: 12,
+            sort: 'newest',
+            inStock: true
+        });
+        const products = response.items || [];
 
         // Create slider items for all product color variants
         const sliderItems = [];
@@ -469,11 +533,9 @@ async function loadProductSlider() {
 
         const html = sliderItems.map(item => {
             const hasDiscount = item.discount && item.discount > 0;
-            const isOutOfStock = item.stock <= 0;
-            
             return `
                 <div class="slider-product-card" onclick="window.location.href='product-detail.html?id=${item.id}${item.selectedColor ? '&color=' + item.selectedColor.id : ''}'">
-                    <img src="${item.displayImage}" alt="${item.name}">
+                    <img src="${item.displayImage}" alt="${item.name}" loading="lazy" decoding="async">
                     <div class="product-info">
                         <h3>${item.name}</h3>
                         ${item.colorName ? `
@@ -488,7 +550,6 @@ async function loadProductSlider() {
                                 <span class="decreased">EGP ${item.displayPrice.toFixed(2)}</span>
                             ` : `EGP ${item.displayPrice.toFixed(2)}`}
                         </div>
-                        ${isOutOfStock ? '<span class="out-of-stock">Out of Stock</span>' : ''}
                     </div>
                 </div>
             `;
@@ -497,6 +558,7 @@ async function loadProductSlider() {
         slider.innerHTML = html;
     } catch (error) {
         console.error('Error loading product slider:', error);
+        slider.innerHTML = '<p class="no-products">Products are temporarily unavailable.</p>';
     }
 }
 

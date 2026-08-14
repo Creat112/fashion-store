@@ -11,6 +11,45 @@ async function getProducts(category = null) {
     }
 }
 
+async function getProductsPage(options = {}) {
+    try {
+        const params = new URLSearchParams();
+        Object.entries(options).forEach(([key, value]) => {
+            if (value !== null && value !== undefined && value !== '') {
+                params.set(key, value);
+            }
+        });
+
+        const response = await api.get(`/products?${params.toString()}`);
+        if (Array.isArray(response)) {
+            return {
+                items: response,
+                pagination: {
+                    page: Number(options.page) || 1,
+                    limit: Number(options.limit) || response.length,
+                    total: response.length,
+                    totalPages: response.length ? 1 : 0,
+                    hasNextPage: false,
+                    hasPreviousPage: false
+                }
+            };
+        }
+        return response;
+    } catch (error) {
+        console.error('Error fetching product page:', error);
+        throw error;
+    }
+}
+
+async function getProductMeta() {
+    try {
+        return await api.get('/products/meta');
+    } catch (error) {
+        console.error('Error fetching product filter metadata:', error);
+        return { categories: [], colors: [] };
+    }
+}
+
 const getProductById = async (id) => {
     try {
         return await api.get(`/products/${id}`);
@@ -23,4 +62,4 @@ const getProductById = async (id) => {
 // Seed function not needed on frontend anymore
 const seedProducts = async () => { };
 
-export { getProducts, getProductById, seedProducts };
+export { getProducts, getProductsPage, getProductMeta, getProductById, seedProducts };

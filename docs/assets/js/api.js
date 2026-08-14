@@ -4,8 +4,9 @@ const API_BASE = '/api';
 export const api = {
     async get(endpoint) {
         const res = await fetch(`${API_BASE}${endpoint}`);
-        if (!res.ok) throw new Error(`API Error: ${res.statusText}`);
-        return res.json();
+        const result = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(result.error || `API Error: ${res.statusText}`);
+        return result;
     },
 
     async post(endpoint, data) {
